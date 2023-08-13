@@ -3,10 +3,11 @@ import type { Metadata } from "next";
 import StyledComponentRegistry from "./antd";
 import "./globals.css";
 import theme from "./theme";
+import Wrapper from "./wrapper";
 
 export const metadata: Metadata = {
-  title: "Fale Redirection",
-  description: "Redirecting...",
+  title: "Fale",
+  description: "Fun & Fun! AIoT Lab Experiment!",
 };
 
 export default function RootLayout({
@@ -18,7 +19,9 @@ export default function RootLayout({
     <html lang="ko">
       <body>
         <StyledComponentRegistry>
-          <ConfigProvider theme={theme}>{children}</ConfigProvider>
+          <ConfigProvider theme={theme}>
+            <Wrapper>{children}</Wrapper>
+          </ConfigProvider>
         </StyledComponentRegistry>
       </body>
     </html>

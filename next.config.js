@@ -3,10 +3,15 @@ const nextConfig = {
   async redirects() {
     return [
       {
-        source: '/',
-        destination: '/main',
+        source: '/server',
+        destination: '/server/intro',
         permanent: false,
       },
+      {
+        source: '/server/editor',
+        destination: '/server/editor/node-server',
+        permanent: false,
+      }
     ]
   },
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
