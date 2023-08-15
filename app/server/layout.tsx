@@ -11,5 +11,9 @@ export default function ServerMainLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <ServerFrame>{children}</ServerFrame>;
+  return (
+    <>
+      <ServerFrame>{children}</ServerFrame>
+    </>
+  );
 }

@@ -4,6 +4,16 @@ import { stringLocalStorageEffect } from "./root";
 
 export * from "./root";
 
+export const _renderTargetPath = atom<string>({
+  key: "renderTargetPath",
+  default: "",
+});
+
+export const _renderCurrentPath = atom<string>({
+  key: "renderCurrentPath",
+  default: "",
+});
+
 export const _serverCode = atom<string>({
   key: "serverCode",
   default: "",

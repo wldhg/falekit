@@ -24,6 +24,8 @@ export default function ServerCodeEditor() {
       <PythonCodeEditor
         valueRecoil={_serverCode}
         defaultValue={serverDefaultCode}
+        saveTarget="/backend/save-code"
+        saveType="server"
         style={{
           height: "100%",
         }}

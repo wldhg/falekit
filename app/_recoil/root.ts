@@ -1,3 +1,4 @@
+import type { MessageInstance } from "antd/es/message/interface";
 import { atom, AtomEffect } from "recoil";
 export * from "recoil";
 
@@ -29,4 +30,9 @@ export const _themeName = atom<"light" | "dark">({
 export const _isOnRendering = atom<boolean>({
   key: "isOnRendering",
   default: true,
+});
+
+export const _messageApi = atom<MessageInstance | null>({
+  key: "messageApi",
+  default: null,
 });

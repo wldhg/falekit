@@ -1,9 +1,17 @@
 "use client";
 
 import {
+  FaleGreenResponse,
+  FaleRedResponse,
+  type SaveCodeRequest,
+} from "@/_proto";
+import {
   RecoilState,
+  _isOnRendering,
   _isPyodideAvailable,
+  _messageApi,
   _pyodide,
+  _renderTargetPath,
   _themeName,
   useRecoilState,
   useRecoilValue,
@@ -19,11 +27,10 @@ import {
   Space,
   Spin,
   Typography,
-  message,
 } from "antd";
 import hotkeys from "hotkeys-js";
-import { KeyCode, KeyMod, editor as nsed } from "monaco-editor";
-import { CSSProperties, useEffect, useRef, useState } from "react";
+import { KeyCode, KeyMod, languages, editor as nsed } from "monaco-editor";
+import { CSSProperties, useCallback, useEffect, useRef, useState } from "react";
 
 import * as styles from "./PythonCodeEditor.module.css";
 
@@ -32,11 +39,17 @@ export default function ServerCodeEditor(props: {
   onChange?: (value: string | undefined) => void;
   valueRecoil: RecoilState<string>;
   style?: CSSProperties;
+  saveTarget?: string;
+  saveType?: "client" | "server";
+  completionProvider?: languages.CompletionItemProvider;
 }) {
   const themeName = useRecoilValue(_themeName);
   const [codeValue, setCodeValue] = useRecoilState(props.valueRecoil);
   const pyodide = useRecoilValue(_pyodide);
   const isPyodideAvailable = useRecoilValue(_isPyodideAvailable);
+  const isOnRendering = useRecoilValue(_isOnRendering);
+  const renderTargetPath = useRecoilValue(_renderTargetPath);
+  const messageApi = useRecoilValue(_messageApi);
   const [isPythonCodeValid, setIsPythonCodeValid] = useState(true);
   const [pythonCodeError, setPythonCodeError] = useState<string | undefined>();
   const [pythonLocalCode, setPythonLocalCode] = useState<string>(
@@ -46,11 +59,58 @@ export default function ServerCodeEditor(props: {
     useState(false);
   const [savedTextOpacity, setSavedTextOpacity] = useState(0);
   const editorRef = useRef<nsed.IStandaloneCodeEditor>();
-  const [messageApi, contextHolder] = message.useMessage();
+  const pythonLocalCodeRef = useRef<string>(
+    codeValue || props.defaultValue || ""
+  );
+  const savedTextOpacityTimeoutRef = useRef<NodeJS.Timeout>();
+  const waitForNoInputToSaveRequestTimeoutRef = useRef<NodeJS.Timeout>();
+  const waitForNoInputToValidateTimeoutRef = useRef<NodeJS.Timeout>();
+
+  const requestToRemoteSave = useCallback(
+    (displaySuccessMessage: boolean = false) => {
+      if (props.saveTarget && props.saveType) {
+        const saveRequest: SaveCodeRequest = {
+          type: props.saveType,
+          code: `${pythonLocalCodeRef.current}`,
+        };
+        fetch(props.saveTarget, {
+          method: "POST",
+          body: JSON.stringify(saveRequest),
+        })
+          .then((res) => res.json())
+          .then((res: FaleGreenResponse | FaleRedResponse) => {
+            if (res.code === "red") {
+              messageApi?.error(`그런데 저장에 실패했습니다. (${res.error})`);
+            } else {
+              if (displaySuccessMessage) {
+                messageApi?.success(
+                  "페이지를 떠나기 전에 코드를 저장했습니다."
+                );
+              }
+              if (savedTextOpacityTimeoutRef.current) {
+                clearTimeout(savedTextOpacityTimeoutRef.current);
+              }
+
+              setSavedTextOpacity(1);
+
+              savedTextOpacityTimeoutRef.current = setTimeout(() => {
+                setSavedTextOpacity(0);
+              }, 500);
+            }
+          });
+      }
+    },
+    [messageApi, props.saveTarget, props.saveType]
+  );
+
+  const ctrlSAction = useCallback(() => {
+    messageApi?.success("자동으로 저장하고 있습니다! 안심하세요~");
+    requestToRemoteSave();
+  }, [messageApi, requestToRemoteSave]);
 
   useEffect(() => {
     hotkeys("ctrl+s, command+s", (e) => {
-      messageApi.success("자동으로 저장하고 있습니다! 안심하세요~");
+      ctrlSAction();
 
       return false;
     });
@@ -58,56 +118,24 @@ export default function ServerCodeEditor(props: {
     return () => {
       hotkeys.unbind("ctrl+s, command+s");
     };
-  }, [messageApi]);
-
-  const validateAndSave = (value: string | undefined) => {
-    setPythonLocalCode(value || "");
-    if (value && pyodide && isPyodideAvailable) {
-      try {
-        let syntaxError = pyodide.runPython(`
-import ast
-
-def validate(code):
-    try:
-        ast.parse(code)
-    except SyntaxError as e:
-        return str(e)
-    return None
-
-validate("""${value.replace(/"""/g, "'''")}""")
-        `);
-        setCodeValue(value);
-        props.onChange?.(value);
-        if (syntaxError) {
-          setIsPythonCodeValid(false);
-          setPythonCodeError(syntaxError);
-          throw new Error(syntaxError);
-        } else {
-          setIsPythonCodeValid(true);
-          setPythonCodeError(undefined);
-        }
-      } catch (e) {
-        console.log(e);
-      }
-    }
-  };
+  }, [ctrlSAction]);
 
   useEffect(() => {
     if (pyodide && isPyodideAvailable) {
-      validateAndSave(pythonLocalCode);
+      handleEditorChange(pythonLocalCode);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pyodide, isPyodideAvailable]);
 
   const initValue = () => {
     if (!isInitializationRequested) {
-      messageApi.info("코드를 초기화하려면 버튼을 한번 더 누르세요.");
+      messageApi?.info("코드를 초기화하려면 버튼을 한번 더 누르세요.");
       setIsInitializationRequested(true);
     } else {
-      messageApi.success("코드가 초기화되었습니다.");
+      messageApi?.success("코드가 초기화되었습니다.");
       const initialValue = props.defaultValue || "";
       setPythonLocalCode(initialValue);
-      validateAndSave(initialValue);
+      handleEditorChange(initialValue);
       setIsInitializationRequested(false);
     }
   };
@@ -124,21 +152,97 @@ validate("""${value.replace(/"""/g, "'''")}""")
     return () => {};
   }, [isInitializationRequested]);
 
+  const validatePythonCode = useCallback(
+    (value: string) => {
+      if (value && pyodide && isPyodideAvailable) {
+        try {
+          let syntaxError = pyodide.runPython(`
+import ast
+
+def validate(code):
+    try:
+        ast.parse(code)
+    except SyntaxError as e:
+        return str(e)
+    return None
+
+validate("""${value.replace(/"""/g, "'''")}""")
+          `);
+          if (syntaxError) {
+            throw new Error(String(syntaxError));
+          } else {
+            setIsPythonCodeValid(true);
+            setPythonCodeError(undefined);
+          }
+        } catch (e: any) {
+          console.log(e);
+          setIsPythonCodeValid(false);
+          setPythonCodeError(e?.message);
+        }
+      }
+    },
+    [pyodide, isPyodideAvailable]
+  );
+
   useEffect(() => {
-    if (isPyodideAvailable) {
-      setSavedTextOpacity(1);
+    if (pythonLocalCodeRef.current !== pythonLocalCode) {
+      pythonLocalCodeRef.current = pythonLocalCode;
+    }
 
-      const dismissTO = setTimeout(() => {
-        setSavedTextOpacity(0);
-      }, 500);
+    setCodeValue(pythonLocalCode);
+    props.onChange?.(pythonLocalCode);
 
+    if (waitForNoInputToSaveRequestTimeoutRef.current) {
+      clearTimeout(waitForNoInputToSaveRequestTimeoutRef.current);
+    }
+
+    const saveTO = setTimeout(() => {
+      requestToRemoteSave();
+    }, 500);
+
+    waitForNoInputToSaveRequestTimeoutRef.current = saveTO;
+
+    if (waitForNoInputToValidateTimeoutRef.current) {
+      clearTimeout(waitForNoInputToValidateTimeoutRef.current);
+    }
+
+    const validateTO = setTimeout(() => {
+      validatePythonCode(pythonLocalCode);
+    }, 100);
+
+    waitForNoInputToValidateTimeoutRef.current = validateTO;
+
+    return () => {
+      clearTimeout(saveTO);
+      clearTimeout(validateTO);
+    };
+  }, [
+    pythonLocalCode,
+    setCodeValue,
+    props,
+    requestToRemoteSave,
+    validatePythonCode,
+  ]);
+
+  useEffect(() => {
+    if (props.saveType && props.saveTarget) {
       return () => {
-        clearTimeout(dismissTO);
+        if (
+          isOnRendering &&
+          renderTargetPath !== `/server/editor/node-${props.saveType}`
+        ) {
+          requestToRemoteSave(true);
+        }
       };
     }
     return () => {};
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pythonLocalCode]);
+  }, [
+    isOnRendering,
+    renderTargetPath,
+    props.saveTarget,
+    props.saveType,
+    requestToRemoteSave,
+  ]);
 
   const handleEditorDidMount = (
     editor: nsed.IStandaloneCodeEditor,
@@ -146,13 +250,18 @@ validate("""${value.replace(/"""/g, "'''")}""")
   ) => {
     editorRef.current = editor;
     editor.addCommand(KeyMod.CtrlCmd | KeyCode.KeyS, function () {
-      messageApi.success("자동으로 저장하고 있습니다! 안심하세요~");
+      ctrlSAction();
     });
-    // monaco.languages.setMonarchTokensProvider("python", {
-    //   tokenizer: {
-    //     root: [[/get_accel_x/, { token: "function" }]],
-    //   },
-    // });
+    if (props.completionProvider) {
+      monaco.languages.registerCompletionItemProvider(
+        "python",
+        props.completionProvider
+      );
+    }
+  };
+
+  const handleEditorChange = (value: string | undefined) => {
+    setPythonLocalCode(value || "");
   };
 
   return (
@@ -163,7 +272,6 @@ validate("""${value.replace(/"""/g, "'''")}""")
         ...props.style,
       }}
     >
-      {contextHolder}
       <Row>
         <Col flex="auto">
           <Space>
@@ -230,7 +338,7 @@ validate("""${value.replace(/"""/g, "'''")}""")
           defaultValue={props.defaultValue}
           value={pythonLocalCode}
           theme={themeName === "dark" ? "vs-dark" : "light"}
-          onChange={validateAndSave}
+          onChange={handleEditorChange}
           onMount={handleEditorDidMount}
         />
       </Spin>

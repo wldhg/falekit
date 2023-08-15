@@ -1,35 +1,45 @@
 import { Menu } from "antd";
 
-import { _isOnRendering, useSetRecoilState } from "@/_recoil/server";
+import {
+  _isOnRendering,
+  _renderCurrentPath,
+  _renderTargetPath,
+  useRecoilState,
+  useSetRecoilState,
+} from "@/_recoil/server";
 import {
   CodeOutlined,
   InfoCircleOutlined,
   RadarChartOutlined,
 } from "@ant-design/icons";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 export default function MenuItems() {
   const router = useRouter();
   const pathname = usePathname();
   const setIsOnRendering = useSetRecoilState(_isOnRendering);
-  const [currentNav, setCurrentNav] = useState(pathname);
+  const [renderTargetPath, setRenderTargetPath] =
+    useRecoilState(_renderTargetPath);
+  const setRenderCurrentPath = useSetRecoilState(_renderCurrentPath);
 
   useEffect(() => {
-    setCurrentNav(pathname);
+    setRenderTargetPath(pathname);
+    setRenderCurrentPath(pathname);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    console.log(`Path matching: ${pathname} == ${currentNav}`);
-    if (pathname == currentNav) {
+    console.log(`Path matching: ${pathname} == ${renderTargetPath}`);
+    if (pathname == renderTargetPath) {
       setIsOnRendering(false);
+      setRenderCurrentPath(pathname);
     }
-  }, [pathname, currentNav, setIsOnRendering]);
+  }, [pathname, renderTargetPath, setIsOnRendering, setRenderCurrentPath]);
 
   const onClickNav = (info: any) => {
     setIsOnRendering(true);
-    setCurrentNav(info.key);
+    setRenderTargetPath(info.key);
     router.replace(info.key);
   };
 

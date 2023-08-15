@@ -26,3 +26,13 @@ export const _isCodeRunning = atom<boolean>({
   key: "isCodeRunning",
   default: false,
 });
+
+export const _printedLog = atom<string[]>({
+  key: "printedLog",
+  default: [],
+});
+
+export const _workerStatus = atom<string>({
+  key: "workerStatus",
+  default: "워커 대기 중",
+});

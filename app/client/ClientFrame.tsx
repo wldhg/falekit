@@ -3,6 +3,7 @@
 import ThemedLogo from "@/_components/ThemedLogo";
 import { Divider, Space, Typography, theme } from "antd";
 import ClientCodeManger from "./ClientCodeManager";
+import ClientCodeRunner from "./ClientCodeRunner";
 import Data3dView from "./Data3dView";
 import DataTableView from "./DataTableView";
 
@@ -66,13 +67,29 @@ export default function ClientFrame() {
       <Divider />
       <div
         style={{
-          padding: "0 16px 16px 16px",
+          padding: "0 16px",
           width: "100%",
           boxSizing: "border-box",
         }}
       >
         <ClientCodeManger />
       </div>
+      <Divider />
+      <div
+        style={{
+          padding: "0 16px",
+          width: "100%",
+          boxSizing: "border-box",
+        }}
+      >
+        <ClientCodeRunner />
+      </div>
+      <div
+        style={{
+          width: "100%",
+          height: "32px",
+        }}
+      ></div>
     </Space>
   );
 }

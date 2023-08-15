@@ -4,7 +4,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { _isOnRendering, useSetRecoilState } from "./_recoil/root";
 
-export function NavigationEvents() {
+export default function NavigationEvents() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const setIsOnRendering = useSetRecoilState(_isOnRendering);

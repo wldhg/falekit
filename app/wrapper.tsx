@@ -3,8 +3,9 @@
 import { ConfigProvider, theme } from "antd";
 import { Suspense, useEffect, useState } from "react";
 import { RecoilRoot } from "recoil";
+import MessageApi from "./MessageApi";
 import MobileDetector from "./MobileDetector";
-import { NavigationEvents } from "./NavigationEvents";
+import NavigationEvents from "./NavigationEvents";
 import SuspenseSpin from "./SuspenseSpin";
 import ThemeSaver from "./ThemeSaver";
 
@@ -35,23 +36,24 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <RecoilRoot>
-      <ConfigProvider
-        theme={{
-          algorithm:
-            colorScheme === "light"
-              ? theme.defaultAlgorithm
-              : theme.darkAlgorithm,
-        }}
-      >
-        <MobileDetector />
-        <ThemeSaver theme={colorScheme} />
-        <Suspense fallback={<SuspenseSpin />}>
+    <Suspense fallback={<SuspenseSpin />}>
+      <RecoilRoot>
+        <ConfigProvider
+          theme={{
+            algorithm:
+              colorScheme === "light"
+                ? theme.defaultAlgorithm
+                : theme.darkAlgorithm,
+          }}
+        >
+          <MobileDetector />
+          <ThemeSaver theme={colorScheme} />
+          <MessageApi />
           <NavigationEvents />
           {children}
-        </Suspense>
-      </ConfigProvider>
-    </RecoilRoot>
+        </ConfigProvider>
+      </RecoilRoot>
+    </Suspense>
   );
 };
 

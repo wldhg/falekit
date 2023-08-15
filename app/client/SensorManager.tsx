@@ -3,15 +3,16 @@
 import {
   _currentSensorData,
   _isSensorReady,
+  _messageApi,
+  useRecoilValue,
   useSetRecoilState,
 } from "@/_recoil/client";
-import { message } from "antd";
 import { useEffect } from "react";
 
 export default function SensorManager() {
   const setIsSensorReady = useSetRecoilState(_isSensorReady);
   const setCurrentSensorData = useSetRecoilState(_currentSensorData);
-  const [messageApi, contextHolder] = message.useMessage();
+  const messageApi = useRecoilValue(_messageApi);
 
   useEffect(() => {
     const isPermissionRequestRequired =
@@ -61,19 +62,19 @@ export default function SensorManager() {
             if (state === "granted") {
               window.addEventListener("devicemotion", dmhandler);
               setIsSensorReady(true);
-              messageApi.success("센서 준비됨");
+              messageApi?.success("센서 준비됨");
             } else {
-              messageApi.error(`센서 권한 취득 실패 (S: ${state})`);
+              messageApi?.error(`센서 권한 취득 실패 (S: ${state})`);
             }
           })
           .catch((e: any) => {
             console.error(e);
-            messageApi.error(`센서 권한 취득 실패 (C: ${e?.message})`);
+            messageApi?.error(`센서 권한 취득 실패 (C: ${e?.message})`);
           });
       } else {
         window.addEventListener("devicemotion", dmhandler);
         setIsSensorReady(true);
-        messageApi.success("센서 준비됨");
+        messageApi?.success("센서 준비됨");
       }
     };
 
@@ -84,5 +85,5 @@ export default function SensorManager() {
     };
   }, [setIsSensorReady, setCurrentSensorData, messageApi]);
 
-  return <>{contextHolder}</>;
+  return null;
 }
