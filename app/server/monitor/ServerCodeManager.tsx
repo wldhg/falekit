@@ -2,16 +2,15 @@
 
 import type { FaleGreenResponse, FaleRedResponse } from "@/_proto";
 import {
-  _clientCode,
   _isCodeRunning,
-  _isSensorReady,
   _lastTimeCodeLoaded,
   _messageApi,
+  _serverCodeOnMonitor,
   _themeName,
   _workerStatus,
   useRecoilState,
   useRecoilValue,
-} from "@/_recoil/client";
+} from "@/_recoil/server";
 import { Button, Col, Row, Space, Spin, Typography, theme } from "antd";
 import { useState } from "react";
 import SyntaxHighlighter from "react-syntax-highlighter";
@@ -20,12 +19,11 @@ import {
   atomOneLight,
 } from "react-syntax-highlighter/dist/esm/styles/hljs";
 
-export default function ClientCodeManager() {
-  const [clientCode, setClientCode] = useRecoilState(_clientCode);
+export default function ServerCodeManager() {
+  const [serverCode, setServerCode] = useRecoilState(_serverCodeOnMonitor);
   const [lastTimeCodeLoaded, setLastTimeCodeLoaded] =
     useRecoilState(_lastTimeCodeLoaded);
   const [isCodeRunning, setIsCodeRunning] = useRecoilState(_isCodeRunning);
-  const isSensorReady = useRecoilValue(_isSensorReady);
   const themeName = useRecoilValue(_themeName);
   const workerStatus = useRecoilValue(_workerStatus);
   const messageApi = useRecoilValue(_messageApi);
@@ -34,24 +32,24 @@ export default function ClientCodeManager() {
     token: { colorBorder, borderRadius },
   } = theme.useToken();
 
-  const updateClientCode = (e: any) => {
+  const updateServerCode = (e: any) => {
     setIsCodeLoading(true);
-    fetch("/backend/load-code?type=client")
+    fetch("/backend/load-code?type=server")
       .then((res) => res.json())
       .then((res: FaleGreenResponse | FaleRedResponse) => {
         if (res.code === "green") {
-          setClientCode(res.data);
+          setServerCode(res.data);
           setLastTimeCodeLoaded(Date.now());
         } else {
           messageApi?.error({
-            content: `센서 코드 로드 실패 (${res.error})`,
+            content: `서버 코드 로드 실패 (${res.error})`,
           });
         }
         setIsCodeLoading(false);
       })
       .catch((err) => {
         messageApi?.error({
-          content: `센서 코드 로드 중 오류 발생 (${err})`,
+          content: `서버 코드 로드 중 오류 발생 (${err})`,
         });
         setIsCodeLoading(false);
       });
@@ -64,9 +62,6 @@ export default function ClientCodeManager() {
     } else {
       clientStatus = "실행 가능";
     }
-  }
-  if (!isSensorReady) {
-    clientStatus = "센서 응답 대기 중";
   }
 
   let lastTimeCodeLoadedString = "로드한 적 없음";
@@ -94,12 +89,11 @@ export default function ClientCodeManager() {
       </Row>
       <Row>
         <Col flex={1}>
-          <Typography.Text type="secondary">
-            {lastTimeCodeLoadedString}
-          </Typography.Text>
-        </Col>
-        <Col>
           <Space>
+            <Typography.Text type="secondary">
+              {lastTimeCodeLoadedString}
+            </Typography.Text>
+
             <Spin
               size="small"
               style={{
@@ -107,14 +101,6 @@ export default function ClientCodeManager() {
               }}
               spinning={isCodeLoading}
             />
-            <Button
-              type="primary"
-              onClick={updateClientCode}
-              disabled={!isSensorReady || isCodeLoading || isCodeRunning}
-              size="small"
-            >
-              센서 코드 로드
-            </Button>
           </Space>
         </Col>
       </Row>
@@ -123,7 +109,6 @@ export default function ClientCodeManager() {
           backgroundColor: themeName === "dark" ? "#292c33" : "#fafafa",
           border: `1px solid ${colorBorder}`,
           borderRadius: borderRadius,
-          maxWidth: "calc(100vw - 32px)",
           overflow: "hidden",
         }}
       >
@@ -133,22 +118,41 @@ export default function ClientCodeManager() {
           customStyle={{
             fontFamily: "'Fira Mono', monospace",
             maxHeight: "20vh",
-            maxWidth: "calc(100vw - 32px)",
-            width: "calc(100vw - 32px)",
+            maxWidth: "260px",
+            width: "260px",
           }}
         >
-          {clientCode}
+          {serverCode}
         </SyntaxHighlighter>
       </div>
-      <Button
-        type="primary"
-        danger={isCodeRunning}
-        onClick={isCodeRunning ? stopClientCode : runClientCode}
-        disabled={!isSensorReady || lastTimeCodeLoaded === 0 || isCodeLoading}
-        style={{ width: "100%", fontSize: "1.2rem", height: "3rem" }}
-      >
-        {isCodeRunning ? "코드 중지" : "코드 실행"}
-      </Button>
+      <Row>
+        <Col flex={3}>
+          <Button
+            type="primary"
+            danger={isCodeRunning}
+            onClick={isCodeRunning ? stopClientCode : runClientCode}
+            disabled={lastTimeCodeLoaded === 0 || isCodeLoading}
+            style={{ width: "100%", fontSize: "1.2rem", height: "3rem" }}
+          >
+            {isCodeRunning ? "코드 중지" : "코드 실행"}
+          </Button>
+        </Col>
+        <Col flex={1}>
+          <Button
+            type="default"
+            onClick={updateServerCode}
+            disabled={isCodeLoading || isCodeRunning}
+            style={{
+              marginLeft: "8px",
+              width: "calc(100% - 8px)",
+              fontSize: "1.2rem",
+              height: "3rem",
+            }}
+          >
+            로드
+          </Button>
+        </Col>
+      </Row>
     </Space>
   );
 }

@@ -111,7 +111,7 @@ export default function DataTableView() {
       >
         <Col flex={1}>Time</Col>
         <Col flex={3} className={styles.data}>
-          {isSensorReady ? currentSensorData[6] : "..."}
+          {isSensorReady ? currentSensorData[9] : "..."}
         </Col>
       </Row>
     </Space>

@@ -1,22 +1,16 @@
-import { clientWrapperCodePost, clientWrapperCodePre } from "@/_misc";
-import type {
-  FaleGreenResponse,
-  FaleRedResponse,
-  SaveDataRequest,
-} from "@/_proto";
+import { serverWrapperCodePost, serverWrapperCodePre } from "@/_misc";
 import {
-  _clientCode,
-  _currentSensorData,
   _isCodeRunning,
-  _isSensorReady,
   _messageApi,
   _printedLog,
+  _serverCodeOnMonitor,
+  _serverMonitorData,
   _themeName,
   _workerStatus,
   useRecoilState,
   useRecoilValue,
   useSetRecoilState,
-} from "@/_recoil/client";
+} from "@/_recoil/server";
 import { Typography, theme } from "antd";
 import { useEffect, useRef, useState } from "react";
 import SyntaxHighlighter from "react-syntax-highlighter";
@@ -25,8 +19,8 @@ import {
   atomOneLight,
 } from "react-syntax-highlighter/dist/esm/styles/hljs";
 
-const serverEndpoint = "/backend/save-data";
-const workerURL = "/client-worker.js";
+const serverEndpoint = "/backend/load-data";
+const workerURL = "/server-worker.js";
 
 function decodeB64Bytes(base64: string): string {
   const binaryString = atob(base64);
@@ -37,17 +31,15 @@ function decodeB64Bytes(base64: string): string {
   return new TextDecoder().decode(bytes.buffer);
 }
 
-export default function ClientCodeRunner() {
+export default function ServerCodeRunner() {
   const [isCodeRunning, setIsCodeRunning] = useRecoilState(_isCodeRunning);
-  const clientCode = useRecoilValue(_clientCode);
-  const isSensorReady = useRecoilValue(_isSensorReady);
-  const currentSensorData = useRecoilValue(_currentSensorData);
+  const serverCode = useRecoilValue(_serverCodeOnMonitor);
   const messageApi = useRecoilValue(_messageApi);
   const themeName = useRecoilValue(_themeName);
   const [printedLog, setPrintedLog] = useRecoilState(_printedLog);
   const setWorkerStatus = useSetRecoilState(_workerStatus);
+  const setServerMonitorData = useSetRecoilState(_serverMonitorData);
   const [exitCode, setExitCode] = useState<number | null>(null);
-  const sensorDataRef = useRef<number[]>([0, 0, 0, 0, 0, 0, 0]);
   const logRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -55,20 +47,12 @@ export default function ClientCodeRunner() {
   } = theme.useToken();
 
   useEffect(() => {
-    if (isSensorReady) {
-      sensorDataRef.current = currentSensorData;
-    } else {
-      sensorDataRef.current = [
-        -10000, -10000, -10000, -10000, -10000, -10000, -10000,
-      ];
-    }
-  }, [isSensorReady, currentSensorData]);
-
-  useEffect(() => {
     if (isCodeRunning) {
-      const indentedClientCode = "    " + clientCode.split("\n").join("\n    ");
-      const finalClientCode =
-        clientWrapperCodePre + indentedClientCode + clientWrapperCodePost;
+      setServerMonitorData({});
+
+      const indentedServerCode = "    " + serverCode.split("\n").join("\n    ");
+      const finalServerCode =
+        serverWrapperCodePre + indentedServerCode + serverWrapperCodePost;
 
       const falekit = {
         reset: () => {
@@ -80,10 +64,27 @@ export default function ClientCodeRunner() {
           setWorkerStatus(text);
         },
         get_script: () => {
-          return finalClientCode;
+          return finalServerCode;
         },
-        get_data: () => {
-          return sensorDataRef.current;
+        display: (b64_name: string, b64_data: string) => {
+          const name = decodeB64Bytes(b64_name);
+          const data = decodeB64Bytes(b64_data);
+          const data_json = JSON.parse(data);
+          let data_to_save = data_json;
+          if (Array.isArray(data_json) && Array.isArray(data_json[0])) {
+            const x = data_json[0];
+            const y = data_json[1];
+            data_to_save = {
+              x,
+              y,
+            };
+          } else if (Array.isArray(data_json)) {
+            data_to_save = {
+              x: data_json.map((_, i) => i),
+              y: data_json,
+            };
+          }
+          setServerMonitorData((prev) => ({ ...prev, [name]: data_to_save }));
         },
         finished: (code: number) => {
           setIsCodeRunning(false);
@@ -98,43 +99,6 @@ export default function ClientCodeRunner() {
         print: (b64_msg: string) => {
           const msg = decodeB64Bytes(b64_msg);
           setPrintedLog((prev) => [...prev, msg]);
-        },
-        send: (b64_name: string, b64_msg: string) => {
-          const name = decodeB64Bytes(b64_name);
-          const msgRaw = decodeB64Bytes(b64_msg);
-          const msg = JSON.parse(msgRaw);
-          console.log("send[from-py]", name, msg);
-          const req: SaveDataRequest = {
-            name,
-            data: msg,
-          };
-          fetch(serverEndpoint, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(req),
-          })
-            .then((res) => {
-              if (res.status !== 200) {
-                console.error("Failed to send data to server", res);
-                messageApi?.error("데이터 전송 실패");
-              }
-              return res.json();
-            })
-            .then((res: FaleGreenResponse | FaleRedResponse) => {
-              if (res.code !== "green") {
-                console.error(
-                  "Failed to send data to server [json success]",
-                  res
-                );
-                messageApi?.error("데이터 전송 실패");
-              }
-            })
-            .catch((err) => {
-              console.error("Failed to send data to server [json fail]", err);
-              messageApi?.error("데이터 전송 실패");
-            });
         },
       };
 
@@ -168,11 +132,12 @@ export default function ClientCodeRunner() {
     return () => {};
   }, [
     isCodeRunning,
-    clientCode,
+    serverCode,
     setPrintedLog,
     messageApi,
     setIsCodeRunning,
     setWorkerStatus,
+    setServerMonitorData,
   ]);
 
   useEffect(() => {
@@ -196,7 +161,7 @@ export default function ClientCodeRunner() {
           borderRadius: borderRadius,
           maxWidth: "calc(100vw - 32px)",
           overflow: "hidden",
-          marginTop: 16,
+          marginTop: 8,
         }}
       >
         <SyntaxHighlighter
@@ -205,7 +170,7 @@ export default function ClientCodeRunner() {
           showLineNumbers
           customStyle={{
             fontFamily: "'Fira Mono', monospace",
-            maxHeight: "20vh",
+            maxHeight: "15vh",
             maxWidth: "calc(100vw - 32px)",
             width: "calc(100vw - 32px)",
           }}

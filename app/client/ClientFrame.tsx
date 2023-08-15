@@ -3,6 +3,7 @@
 import ThemedLogo from "@/_components/ThemedLogo";
 import { _resetRotAccum, useSetRecoilState } from "@/_recoil/client";
 import { Button, Col, Divider, Row, Space, Typography, theme } from "antd";
+import { useEffect } from "react";
 import ClientCodeManger from "./ClientCodeManager";
 import ClientCodeRunner from "./ClientCodeRunner";
 import Data3dView from "./Data3dView";
@@ -13,6 +14,27 @@ export default function ClientFrame() {
     token: { colorBgElevated, colorBorder },
   } = theme.useToken();
   const setResetRotAccum = useSetRecoilState(_resetRotAccum);
+
+  useEffect(() => {
+    fetch("/backend/give-ping?inc=true", {
+      method: "GET",
+    });
+
+    const handleBeforeUnload = () => {
+      fetch("/backend/give-ping?inc=false", {
+        method: "GET",
+      });
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      fetch("/backend/give-ping?inc=false", {
+        method: "GET",
+      });
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
 
   return (
     <Space direction="vertical">

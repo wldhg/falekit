@@ -1,11 +1,14 @@
 const path = require("path");
 const fs = require("fs");
+const os = require("os");
 const proxy = require("http-proxy");
 
 const SSL_KEY_PATH = path.join(__dirname, "../assets/localhost.key");
 const SSL_CERT_PATH = path.join(__dirname, "../assets/localhost.crt");
 
 console.log(`Proxying below to https://0.0.0.0:3000`);
+
+fs.unlinkSync(path.join(os.tmpdir(), "FALETEMP_ping.json"));
 
 proxy
   .createServer({

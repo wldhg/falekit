@@ -20,11 +20,13 @@ export async function POST(request: NextRequest) {
     let infoDataContent = {
       latestTime: 0,
       latestData: null,
-      last100data: [],
+      last200data: [],
     };
 
     if (infoFileCache.has(body.name)) {
       infoDataContent = infoFileCache.get(body.name);
+    } else if (fs.existsSync(infoFileName)) {
+      infoDataContent = JSON.parse(fs.readFileSync(infoFileName, "utf-8"));
     }
 
     if (infoDataContent.latestTime < nowEpoch) {
@@ -32,9 +34,9 @@ export async function POST(request: NextRequest) {
       // @ts-ignore-next-line
       infoDataContent.latestData = body.data;
       // @ts-ignore-next-line
-      infoDataContent.last100data.push([nowEpoch, body.data]);
-      if (infoDataContent.last100data.length > 100) {
-        infoDataContent.last100data.shift();
+      infoDataContent.last200data.push([nowEpoch, body.data]);
+      if (infoDataContent.last200data.length > 200) {
+        infoDataContent.last200data.shift();
       }
     }
 
