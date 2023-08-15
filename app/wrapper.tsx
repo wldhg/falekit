@@ -1,10 +1,12 @@
 "use client";
 
-import MobileDetector from "@/_components/MobileDetector";
 import { ConfigProvider, theme } from "antd";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { RecoilRoot } from "recoil";
-import ThemeSaver from "./_components/ThemeSaver";
+import MobileDetector from "./MobileDetector";
+import { NavigationEvents } from "./NavigationEvents";
+import SuspenseSpin from "./SuspenseSpin";
+import ThemeSaver from "./ThemeSaver";
 
 type ColorScheme = "dark" | "light";
 
@@ -44,7 +46,10 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
       >
         <MobileDetector />
         <ThemeSaver theme={colorScheme} />
-        {children}
+        <Suspense fallback={<SuspenseSpin />}>
+          <NavigationEvents />
+          {children}
+        </Suspense>
       </ConfigProvider>
     </RecoilRoot>
   );

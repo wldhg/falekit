@@ -3,22 +3,23 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "dev-ssl": "node scripts/proxy-ssl.js & next dev -p 3001",
+    "dev-no-ssl": "next dev",
+    "dev": "node scripts/proxy-ssl.js & next dev -p 3001",
     "build": "next build",
-    "start": "next start",
-    "start-ssl": "node scripts/proxy-ssl.js & next start -p 3001",
+    "start-no-ssl": "next start",
+    "start": "node scripts/proxy-ssl.js & next start -p 3001",
     "lint": "next lint"
   },
   "dependencies": {
     "@ant-design/cssinjs": "^1.13.1",
     "@ant-design/icons": "^5.2.5",
     "@monaco-editor/react": "^4.5.1",
+    "@react-three/fiber": "^8.13.6",
     "@types/node": "20.4.2",
     "@types/react": "18.2.15",
     "@types/react-dom": "18.2.7",
+    "@types/three": "^0.155.0",
     "antd": "^5.7.2",
-    "dotenv": "^16.3.1",
     "eslint": "8.45.0",
     "eslint-config-next": "13.4.10",
     "hotkeys-js": "^3.12.0",
@@ -29,6 +30,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "recoil": "^0.7.7",
+    "three": "^0.155.0",
     "typescript": "5.1.6"
   }
 }

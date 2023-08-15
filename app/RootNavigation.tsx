@@ -1,8 +1,8 @@
 "use client";
 
+import ThemedLogo from "@/_components/ThemedLogo";
 import { DesktopOutlined, MobileOutlined } from "@ant-design/icons";
 import { Button, Space } from "antd";
-import ThemedLogo from "./_components/ThemedLogo";
 
 export default function RootNavigation() {
   const openServerPage = () => {

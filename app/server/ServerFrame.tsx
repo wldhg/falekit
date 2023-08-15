@@ -1,10 +1,11 @@
 "use client";
 
 import ThemedLogo from "@/_components/ThemedLogo";
+import { _isOnRendering, useRecoilValue } from "@/_recoil/server";
 import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
-import { Button, Layout, Typography, theme } from "antd";
+import { Button, Layout, Spin, Typography, theme } from "antd";
 import { useState } from "react";
-import MenuItems from "./MenuItems";
+import ServerNavigation from "./ServerNavigation";
 
 const { Header, Sider, Content } = Layout;
 
@@ -13,9 +14,10 @@ export default function ServerFrame({
 }: {
   children: React.ReactNode;
 }) {
+  const isOnRendering = useRecoilValue(_isOnRendering);
   const [collapsed, setCollapsed] = useState(false);
   const {
-    token: { colorBgBase },
+    token: { colorBgBase, colorBgMask },
   } = theme.useToken();
 
   return (
@@ -53,9 +55,9 @@ export default function ServerFrame({
             서버 / 개발
           </Typography.Text>
         </div>
-        <MenuItems />
+        <ServerNavigation />
       </Sider>
-      <Layout>
+      <Layout style={{ position: "relative" }}>
         <Header style={{ padding: 0, backgroundColor: colorBgBase }}>
           <Button
             type="text"
@@ -78,6 +80,24 @@ export default function ServerFrame({
         >
           {children}
         </Content>
+        {isOnRendering && (
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              backgroundColor: colorBgMask,
+              zIndex: 100,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Spin size="large" />
+          </div>
+        )}
       </Layout>
     </Layout>
   );

@@ -1,9 +1,9 @@
 "use client";
 
-import PythonCodeEditor from "@/_components/PythonCodeEditor";
 import { serverDefaultCode } from "@/_misc";
-import { _serverCode } from "@/_recoil";
+import { _serverCode } from "@/_recoil/server";
 import { Typography } from "antd";
+import PythonCodeEditor from "../PythonCodeEditor";
 
 export default function ServerCodeEditor() {
   return (

@@ -5,10 +5,10 @@ export const metadata: Metadata = {
   description: "Fun & Fun! AIoT Lab Experiment!",
 };
 
-export default function MainLayout({
+export default function ClientMainLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <div>{children}</div>;
+  return <>{children}</>;
 }

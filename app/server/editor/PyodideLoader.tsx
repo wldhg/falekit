@@ -1,7 +1,15 @@
 "use client";
 
-import { _isPyodideAvailable, _pyodide, useSetRecoilState } from "@/_recoil";
-import { PyodideInterface, loadPyodide } from "pyodide";
+import {
+  _isPyodideAvailable,
+  _pyodide,
+  useSetRecoilState,
+} from "@/_recoil/server";
+import {
+  PyodideInterface,
+  version as PyodideVersion,
+  loadPyodide,
+} from "pyodide";
 import { useEffect } from "react";
 
 const PyodideLoader = () => {
@@ -11,7 +19,7 @@ const PyodideLoader = () => {
   useEffect(() => {
     let pyodide_local: PyodideInterface | undefined = undefined;
     loadPyodide({
-      indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/",
+      indexURL: `https://cdn.jsdelivr.net/pyodide/v${PyodideVersion}/full/`,
     })
       .then((pyodide) => {
         setPyodide(pyodide);

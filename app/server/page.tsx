@@ -1,5 +1,5 @@
-const MainPage = () => {
+const ServerMainPage = () => {
   return null;
 };
 
-export default MainPage;
+export default ServerMainPage;

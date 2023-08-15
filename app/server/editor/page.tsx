@@ -1,3 +1,3 @@
 export default function EditorPage() {
-  return <>hai</>;
+  return null;
 }

@@ -1,3 +1,3 @@
-export default function EditorPage() {
-  return <>hai</>;
+export default function IntroPage() {
+  return <>intro</>;
 }

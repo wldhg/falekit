@@ -1,4 +1,4 @@
-import { _themeName, useRecoilValue } from "@/_recoil";
+import { _themeName, useRecoilValue } from "@/_recoil/root";
 import Image from "next/image";
 import { CSSProperties } from "react";
 
