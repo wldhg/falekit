@@ -18,10 +18,10 @@ export default function DataTableView() {
 
   const currentSensorData = currentSensorDataNumbered
     .map((v) => v.toFixed(4).padStart(8, " "))
-    .map((v) => (v === "-100.0000" ? "..." : v));
+    .map((v) => (v === "-10000.0000" ? "..." : v));
 
   const currentSensorDataColor = currentSensorDataNumbered.map((v) => {
-    if (v === -100) {
+    if (v === -10000) {
       return colorTextDisabled;
     } else if (v > 0) {
       return geekblue6;
@@ -48,7 +48,7 @@ export default function DataTableView() {
         >
           {isSensorReady ? currentSensorData[0] : "..."}
         </Col>
-        <Col flex={1}>Rot.X</Col>
+        <Col flex={1}>Gyro.X</Col>
         <Col
           flex={3}
           className={styles.data}
@@ -71,7 +71,7 @@ export default function DataTableView() {
         >
           {isSensorReady ? currentSensorData[1] : "..."}
         </Col>
-        <Col flex={1}>Rot.Y</Col>
+        <Col flex={1}>Gyro.Y</Col>
         <Col
           flex={3}
           className={styles.data}
@@ -94,7 +94,7 @@ export default function DataTableView() {
         >
           {isSensorReady ? currentSensorData[2] : "..."}
         </Col>
-        <Col flex={1}>Rot.Z</Col>
+        <Col flex={1}>Gyro.Z</Col>
         <Col
           flex={3}
           className={styles.data}

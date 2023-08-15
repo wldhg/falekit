@@ -4,6 +4,8 @@ import {
   _currentSensorData,
   _isSensorReady,
   _messageApi,
+  _resetRotAccum,
+  useRecoilState,
   useRecoilValue,
   useSetRecoilState,
 } from "@/_recoil/client";
@@ -12,7 +14,28 @@ import { useEffect } from "react";
 export default function SensorManager() {
   const setIsSensorReady = useSetRecoilState(_isSensorReady);
   const setCurrentSensorData = useSetRecoilState(_currentSensorData);
+  const [resetRotAccum, setResetRotAccum] = useRecoilState(_resetRotAccum);
   const messageApi = useRecoilValue(_messageApi);
+
+  useEffect(() => {
+    if (resetRotAccum) {
+      setCurrentSensorData((prev) => {
+        return [
+          prev[0],
+          prev[1],
+          prev[2],
+          prev[3],
+          prev[4],
+          prev[5],
+          0,
+          0,
+          0,
+          prev[9],
+        ];
+      });
+      setResetRotAccum(false);
+    }
+  }, [resetRotAccum, setResetRotAccum, setCurrentSensorData]);
 
   useEffect(() => {
     const isPermissionRequestRequired =
@@ -20,12 +43,12 @@ export default function SensorManager() {
       typeof window.DeviceOrientationEvent.requestPermission === "function";
 
     const dmhandler = (e: DeviceMotionEvent) => {
-      let x = -100;
-      let y = -100;
-      let z = -100;
-      let alpha = -100;
-      let beta = -100;
-      let gamma = -100;
+      let x = -10000;
+      let y = -10000;
+      let z = -10000;
+      let alpha = -10000;
+      let beta = -10000;
+      let gamma = -10000;
 
       if (e.acceleration !== null) {
         if (e.acceleration.x !== null) {
@@ -51,7 +74,20 @@ export default function SensorManager() {
         }
       }
 
-      setCurrentSensorData([x, y, z, alpha, beta, gamma, e.timeStamp]);
+      setCurrentSensorData((prev) => {
+        return [
+          x,
+          y,
+          z,
+          alpha,
+          beta,
+          gamma,
+          alpha === -10000 ? 0 : prev[6] + alpha,
+          beta === -10000 ? 0 : prev[7] + beta,
+          gamma === -10000 ? 0 : prev[8] + gamma,
+          e.timeStamp,
+        ];
+      });
     };
 
     const requestPermissionSafari = () => {

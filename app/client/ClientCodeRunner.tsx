@@ -58,7 +58,9 @@ export default function ClientCodeRunner() {
     if (isSensorReady) {
       sensorDataRef.current = currentSensorData;
     } else {
-      sensorDataRef.current = [-100, -100, -100, -100, -100, -100, -100];
+      sensorDataRef.current = [
+        -10000, -10000, -10000, -10000, -10000, -10000, -10000,
+      ];
     }
   }, [isSensorReady, currentSensorData]);
 

@@ -1,7 +1,8 @@
 "use client";
 
 import ThemedLogo from "@/_components/ThemedLogo";
-import { Divider, Space, Typography, theme } from "antd";
+import { _resetRotAccum, useSetRecoilState } from "@/_recoil/client";
+import { Button, Col, Divider, Row, Space, Typography, theme } from "antd";
 import ClientCodeManger from "./ClientCodeManager";
 import ClientCodeRunner from "./ClientCodeRunner";
 import Data3dView from "./Data3dView";
@@ -11,6 +12,7 @@ export default function ClientFrame() {
   const {
     token: { colorBgElevated, colorBorder },
   } = theme.useToken();
+  const setResetRotAccum = useSetRecoilState(_resetRotAccum);
 
   return (
     <Space direction="vertical">
@@ -50,10 +52,29 @@ export default function ClientFrame() {
             border: `1px solid ${colorBorder}`,
             backgroundColor: colorBgElevated,
             height: "160px",
+            marginBottom: "16px",
           }}
         >
           <Data3dView />
         </div>
+        <Row>
+          <Col flex={1}>
+            <Typography.Text type="secondary">
+              화살표 길이 = 가속도
+            </Typography.Text>
+          </Col>
+          <Col>
+            <Button
+              onClick={() => {
+                setResetRotAccum(true);
+              }}
+              size="small"
+              type="primary"
+            >
+              자이로(회전) 센서 누적값 초기화
+            </Button>
+          </Col>
+        </Row>
       </div>
       <div
         style={{

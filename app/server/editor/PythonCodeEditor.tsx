@@ -58,6 +58,7 @@ export default function ServerCodeEditor(props: {
   const [isInitializationRequested, setIsInitializationRequested] =
     useState(false);
   const [savedTextOpacity, setSavedTextOpacity] = useState(0);
+  const [isMonacoMounted, setIsMonacoMounted] = useState(false);
   const editorRef = useRef<nsed.IStandaloneCodeEditor>();
   const pythonLocalCodeRef = useRef<string>(
     codeValue || props.defaultValue || ""
@@ -84,7 +85,7 @@ export default function ServerCodeEditor(props: {
             } else {
               if (displaySuccessMessage) {
                 messageApi?.success(
-                  "페이지를 떠나기 전에 코드를 저장했습니다."
+                  "이전 페이지를 떠나기 전에 코드를 저장했습니다."
                 );
               }
               if (savedTextOpacityTimeoutRef.current) {
@@ -258,11 +259,23 @@ validate("""${value.replace(/"""/g, "'''")}""")
         props.completionProvider
       );
     }
+    setIsMonacoMounted(true);
   };
 
   const handleEditorChange = (value: string | undefined) => {
     setPythonLocalCode(value || "");
   };
+
+  let validityType: "success" | "error" | "info" = "success";
+  let validityMessage = "코드 구문은 올바릅니다 :)";
+  if (!isPythonCodeValid) {
+    validityType = "error";
+    validityMessage = pythonCodeError ?? "코드 구문이 올바르지 않습니다 :(";
+  }
+  if (!isPyodideAvailable) {
+    validityType = "info";
+    validityMessage = "코드 구문 분석 준비 중입니다... 잠시만 기다려 주세요.";
+  }
 
   return (
     <div
@@ -276,7 +289,7 @@ validate("""${value.replace(/"""/g, "'''")}""")
         <Col flex="auto">
           <Space>
             <Button
-              disabled={!isPyodideAvailable}
+              disabled={!isMonacoMounted}
               onClick={initValue}
               danger={isInitializationRequested}
               type={isInitializationRequested ? "primary" : "default"}
@@ -293,12 +306,9 @@ validate("""${value.replace(/"""/g, "'''")}""")
           <Space>
             <Typography.Text strong>구문 검사</Typography.Text>
             <Alert
-              type={isPythonCodeValid ? "success" : "error"}
-              message={pythonCodeError ?? "코드 구문은 올바릅니다 :)"}
+              type={validityType}
+              message={validityMessage}
               style={{
-                transition: isPythonCodeValid
-                  ? "opacity 0.5s 0.7s, color 0.5s, background-color 0.5s"
-                  : "opacity 0.5s, color 0.5s, background-color 0.5s",
                 border: "none",
                 backgroundColor: "transparent",
               }}
@@ -322,13 +332,7 @@ validate("""${value.replace(/"""/g, "'''")}""")
       </Row>
       <div style={{ height: "16px", width: "100%" }}></div>
       <Spin
-        spinning={!isPyodideAvailable}
-        style={{}}
-        tip={
-          pyodide
-            ? "Loading Python packages..."
-            : "Loading Python interpreter..."
-        }
+        spinning={!isMonacoMounted}
         // @ts-ignore-next-line
         wrapperClassName={styles.spinWrapper}
       >

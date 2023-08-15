@@ -4,7 +4,7 @@ export * from "./root";
 
 export const _currentSensorData = atom<number[]>({
   key: "currentSensorData",
-  default: [0, 0, 0, 0, 0, 0, 0],
+  default: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 });
 
 export const _isSensorReady = atom<boolean>({
@@ -35,4 +35,9 @@ export const _printedLog = atom<string[]>({
 export const _workerStatus = atom<string>({
   key: "workerStatus",
   default: "워커 대기 중",
+});
+
+export const _resetRotAccum = atom<boolean>({
+  key: "resetRotAccum",
+  default: false,
 });

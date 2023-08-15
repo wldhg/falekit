@@ -74,7 +74,7 @@ export default function MenuItems() {
         {
           key: "/server/monitor",
           icon: <RadarChartOutlined />,
-          label: "모니터",
+          label: "모니터 (서버 실행)",
         },
       ]}
     />

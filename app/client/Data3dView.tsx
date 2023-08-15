@@ -59,25 +59,38 @@ function Arrow(props: {
 function XYZArrows() {
   const currentSensorData = useRecoilValue(_currentSensorData);
   const arrowGroupRef = useRef<any>();
-  const [x, y, z, alpha, beta, gamma, timestamp] = currentSensorData;
+  const [x, y, z, alpha, beta, gamma, alphaacc, betaacc, gammaacc, timestamp] =
+    currentSensorData;
 
   useFrame(() => {
     if (arrowGroupRef.current) {
       const arrowGroup = arrowGroupRef.current;
 
       arrowGroup.rotation.set(
-        (beta * Math.PI) / 180,
-        (alpha * Math.PI) / 180,
-        (-gamma * Math.PI) / 180
+        betaacc / 360 / Math.PI / Math.PI,
+        alphaacc / 360 / Math.PI / Math.PI,
+        -gammaacc / 360 / Math.PI / Math.PI
       );
     }
   });
 
   return (
     <group ref={arrowGroupRef}>
-      <Arrow color="red" arrowLength={x} arrowDirection={[1, 0, 0]} />
-      <Arrow color="green" arrowLength={y} arrowDirection={[0, 1, 0]} />
-      <Arrow color="blue" arrowLength={z} arrowDirection={[0, 0, 1]} />
+      <Arrow
+        color="red"
+        arrowLength={Math.abs(x) + 0.5}
+        arrowDirection={[1, 0, 0]}
+      />
+      <Arrow
+        color="green"
+        arrowLength={Math.abs(y) + 0.5}
+        arrowDirection={[0, 1, 0]}
+      />
+      <Arrow
+        color="blue"
+        arrowLength={Math.abs(z) + 0.5}
+        arrowDirection={[0, 0, 1]}
+      />
     </group>
   );
 }

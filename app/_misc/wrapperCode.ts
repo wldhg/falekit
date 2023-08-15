@@ -34,8 +34,17 @@ def get_gyro_y():
 def get_gyro_z():
     return float(_run_js("self.__falekit.data[5]"))
 
-def get_timestamp():
+def get_gyro_accum_x():
     return float(_run_js("self.__falekit.data[6]"))
+
+def get_gyro_accum_y():
+    return float(_run_js("self.__falekit.data[7]"))
+
+def get_gyro_accum_z():
+    return float(_run_js("self.__falekit.data[8]"))
+
+def get_timestamp():
+    return float(_run_js("self.__falekit.data[9]"))
 
 def send(name, data):
     json_data = _wrap_json.dumps(data)

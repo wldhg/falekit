@@ -24,7 +24,7 @@ self.__falekit = {
   print: (text) => {
     return self.getValueFromMain("print", [text]);
   },
-  data: [0, 0, 0, 0, 0, 0, 0],
+  data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   exit_code: null,
   send_list: [],
 };
