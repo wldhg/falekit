@@ -1,5 +1,6 @@
 "use client";
 
+import ThemedLogo from "@/_components/ThemedLogo";
 import { Col, Divider, Row, Typography } from "antd";
 import MonitorDisplay from "./MonitorDisplay";
 import ServerCodeManager from "./ServerCodeManager";
@@ -22,6 +23,27 @@ export default function MonitorFrame() {
             position: "relative",
           }}
         >
+          <div
+            style={{
+              width: 64,
+              height: 32,
+              position: "relative",
+              marginBottom: 16,
+            }}
+          >
+            <ThemedLogo />
+            <Typography.Text
+              style={{
+                display: "block",
+                left: 70,
+                top: 10,
+                width: 100,
+                position: "relative",
+              }}
+            >
+              서버 / 모니터
+            </Typography.Text>
+          </div>
           <Typography.Title level={4}>서버 코드</Typography.Title>
           <ServerCodeManager />
           <Divider />

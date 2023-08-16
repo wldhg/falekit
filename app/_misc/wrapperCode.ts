@@ -16,6 +16,9 @@ def print(*args, **kwargs):
     value_b64 = _wrap_base64.b64encode(value.encode('utf-8')).decode('utf-8')
     _run_js(f"self.__falekit.print('{value_b64}')")
 
+def get_accel():
+    return tuple(map(float, _run_js("self.__falekit.data.slice(0, 3)")))
+
 def get_accel_x():
     return float(_run_js("self.__falekit.data[0]"))
 
@@ -25,6 +28,9 @@ def get_accel_y():
 def get_accel_z():
     return float(_run_js("self.__falekit.data[2]"))
 
+def get_gyro():
+    return tuple(map(float, _run_js("self.__falekit.data.slice(3, 6)")))
+
 def get_gyro_x():
     return float(_run_js("self.__falekit.data[3]"))
 
@@ -33,6 +39,9 @@ def get_gyro_y():
 
 def get_gyro_z():
     return float(_run_js("self.__falekit.data[5]"))
+
+def get_gyro_accum():
+    return tuple(map(float, _run_js("self.__falekit.data.slice(6, 9)")))
 
 def get_gyro_accum_x():
     return float(_run_js("self.__falekit.data[6]"))

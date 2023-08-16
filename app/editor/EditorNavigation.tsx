@@ -44,7 +44,7 @@ export default function MenuItems() {
       theme="dark"
       mode="inline"
       defaultSelectedKeys={[pathname]}
-      defaultOpenKeys={["/server/editor"]}
+      defaultOpenKeys={["/server/null"]}
       onClick={onClickNav}
       items={[
         {

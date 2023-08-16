@@ -1,6 +1,6 @@
 "use client";
 
-import { serverDefaultCode } from "@/_misc";
+import { serverCodeCompletionProvider, serverDefaultCode } from "@/_misc";
 import { _serverCode } from "@/_recoil/editor";
 import { Typography } from "antd";
 import PythonCodeEditor from "../PythonCodeEditor";
@@ -24,6 +24,7 @@ export default function ServerCodeEditor() {
       <PythonCodeEditor
         valueRecoil={_serverCode}
         defaultValue={serverDefaultCode}
+        completionProvider={serverCodeCompletionProvider}
         saveTarget="/backend/save-code"
         saveType="server"
         style={{
