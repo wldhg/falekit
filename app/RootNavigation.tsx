@@ -1,10 +1,18 @@
 "use client";
 
 import ThemedLogo from "@/_components/ThemedLogo";
-import { DesktopOutlined, MobileOutlined } from "@ant-design/icons";
+import {
+  DesktopOutlined,
+  EditOutlined,
+  MobileOutlined,
+} from "@ant-design/icons";
 import { Button, Space } from "antd";
 
 export default function RootNavigation() {
+  const openEditorPage = () => {
+    window.open("/editor", "_self");
+  };
+
   const openServerPage = () => {
     window.open("/server", "_self");
   };
@@ -32,11 +40,14 @@ export default function RootNavigation() {
       >
         <ThemedLogo />
       </div>
-      <Button onClick={openServerPage} icon={<DesktopOutlined />}>
-        서버 페이지 열기
+      <Button onClick={openEditorPage} icon={<EditOutlined />}>
+        에디터 열기
       </Button>
       <Button onClick={openClientPage} icon={<MobileOutlined />}>
-        클라이언트 페이지 열기
+        클라이언트(센서) 페이지 열기
+      </Button>
+      <Button onClick={openServerPage} icon={<DesktopOutlined />}>
+        서버(모니터) 페이지 열기
       </Button>
     </Space>
   );

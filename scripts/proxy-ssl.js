@@ -8,7 +8,10 @@ const SSL_CERT_PATH = path.join(__dirname, "../assets/localhost.crt");
 
 console.log(`Proxying below to https://0.0.0.0:3000`);
 
-fs.unlinkSync(path.join(os.tmpdir(), "FALETEMP_ping.json"));
+const PING_PATH = path.join(os.tmpdir(), "FALETEMP_ping.json");
+if (fs.existsSync(PING_PATH)) {
+  fs.unlinkSync(PING_PATH);
+}
 
 proxy
   .createServer({

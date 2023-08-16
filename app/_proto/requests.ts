@@ -3,7 +3,7 @@ export interface SaveCodeRequest {
   code: string;
 }
 
-export interface SaveDataRequest {
+export type SaveDataRequest = {
   name: string;
   data: string | number | boolean;
-}
+}[];

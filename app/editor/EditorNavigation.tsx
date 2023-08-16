@@ -6,12 +6,8 @@ import {
   _renderTargetPath,
   useRecoilState,
   useSetRecoilState,
-} from "@/_recoil/server";
-import {
-  CodeOutlined,
-  InfoCircleOutlined,
-  RadarChartOutlined,
-} from "@ant-design/icons";
+} from "@/_recoil/editor";
+import { CodeOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -52,29 +48,24 @@ export default function MenuItems() {
       onClick={onClickNav}
       items={[
         {
-          key: "/server/intro",
+          key: "/editor/intro",
           icon: <InfoCircleOutlined />,
           label: "설명",
         },
         {
-          key: "/server/editor",
+          key: "/editor/null",
           icon: <CodeOutlined />,
-          label: "편집기",
+          label: "코드 편집",
           children: [
             {
-              key: "/server/editor/node-server",
+              key: "/editor/node-server",
               label: "서버 코드",
             },
             {
-              key: "/server/editor/node-client",
+              key: "/editor/node-client",
               label: "센서 코드",
             },
           ],
-        },
-        {
-          key: "/server/monitor",
-          icon: <RadarChartOutlined />,
-          label: "모니터 (서버 실행)",
         },
       ]}
     />

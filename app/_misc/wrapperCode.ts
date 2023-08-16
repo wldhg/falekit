@@ -88,6 +88,30 @@ def display(name, data):
     name_b64 = _wrap_base64.b64encode(name.encode('utf-8')).decode('utf-8')
     _run_js(f"self.__falekit.disp_list.push(['{name_b64}', '{json_data_b64}'])")
 
+def act_led(name, color):
+    color_b64 = _wrap_base64.b64encode(color.encode('utf-8')).decode('utf-8')
+    name_b64 = _wrap_base64.b64encode(name.encode('utf-8')).decode('utf-8')
+    _run_js(f"self.__falekit.act_list.push(['led', '{name_b64}', '{color_b64}'])")
+
+def act_motor(name, speed):
+    speed_float = float(speed)
+    name_b64 = _wrap_base64.b64encode(name.encode('utf-8')).decode('utf-8')
+    _run_js(f"self.__falekit.act_list.push(['motor', '{name_b64}', {speed_float}])")
+
+def act_servo(name, angle):
+    angle_float = float(angle)
+    angle_float = (abs(angle_float // 360) * 360 + angle_float) % 360
+    name_b64 = _wrap_base64.b64encode(name.encode('utf-8')).decode('utf-8')
+    _run_js(f"self.__falekit.act_list.push(['servo', '{name_b64}', {angle_float}])")
+
+def act_buzzer(name, onoff, freq=-1):
+    onoff_int = 1 if onoff else 0
+    freq_float = float(freq)
+    freq_float = max(40.0, freq_float)
+    freq_float = min(1000.0, freq_float)
+    name_b64 = _wrap_base64.b64encode(name.encode('utf-8')).decode('utf-8')
+    _run_js(f"self.__falekit.act_list.push(['buzzer', '{name_b64}', {onoff_int}, {freq_float}])")
+
 try:
 `;
 

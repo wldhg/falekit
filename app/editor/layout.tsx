@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import ServerFrame from "./ServerFrame";
+import EditorFrame from "./EditorFrame";
 
 export const metadata: Metadata = {
-  title: "Fale Server",
+  title: "Fale Editor",
   description: "Fun & Fun! AIoT Lab Experiment!",
 };
 
@@ -13,7 +13,7 @@ export default function ServerMainLayout({
 }) {
   return (
     <>
-      <ServerFrame>{children}</ServerFrame>
+      <EditorFrame>{children}</EditorFrame>
     </>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { clientCodeCompletionProvider, clientDefaultCode } from "@/_misc";
-import { _clientCode } from "@/_recoil/server";
+import { _clientCode } from "@/_recoil/editor";
 import { Typography } from "antd";
 import PythonCodeEditor from "../PythonCodeEditor";
 

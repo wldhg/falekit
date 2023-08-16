@@ -1,12 +1,12 @@
 "use client";
 
 import ThemedLogo from "@/_components/ThemedLogo";
-import { _isOnRendering, useRecoilValue } from "@/_recoil/server";
+import { _isOnRendering, useRecoilValue } from "@/_recoil/editor";
 import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
 import { Button, Layout, Spin, Typography, theme } from "antd";
 import { useState } from "react";
+import ServerNavigation from "./EditorNavigation";
 import PyodideLoader from "./PyodideLoader";
-import ServerNavigation from "./ServerNavigation";
 
 const { Header, Sider, Content } = Layout;
 
@@ -18,7 +18,7 @@ export default function ServerFrame({
   const isOnRendering = useRecoilValue(_isOnRendering);
   const [collapsed, setCollapsed] = useState(false);
   const {
-    token: { colorBgBase, colorBgMask },
+    token: { colorBgLayout, colorBgMask },
   } = theme.useToken();
 
   return (
@@ -39,6 +39,7 @@ export default function ServerFrame({
             }}
           >
             <ThemedLogo
+              fixedTo="light"
               style={{
                 padding: collapsed ? "0 22%" : "0 30%",
                 transition: "padding 0.3s",
@@ -53,6 +54,7 @@ export default function ServerFrame({
                 width: "100%",
                 transition: "opacity 0.3s",
                 opacity: collapsed ? 0 : 1,
+                color: "whitesmoke",
               }}
             >
               서버 / 개발
@@ -61,7 +63,7 @@ export default function ServerFrame({
           <ServerNavigation />
         </Sider>
         <Layout style={{ position: "relative" }}>
-          <Header style={{ padding: 0, backgroundColor: colorBgBase }}>
+          <Header style={{ padding: 0, backgroundColor: colorBgLayout }}>
             <Button
               type="text"
               icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}

@@ -7,12 +7,27 @@ import {
 } from "monaco-editor";
 
 const clientCodeCompletionRawList: string[][] = [
+  [
+    "get_accel",
+    "get_accel()",
+    "가속도 센서의 값을 읽어옵니다. (x, y, z) 튜플을 반환합니다.",
+  ],
   ["get_accel_x", "get_accel_x()", "가속도 센서의 x축 값을 읽어옵니다."],
   ["get_accel_y", "get_accel_y()", "가속도 센서의 y축 값을 읽어옵니다."],
   ["get_accel_z", "get_accel_z()", "가속도 센서의 z축 값을 읽어옵니다."],
+  [
+    "get_gyro",
+    "get_gyro()",
+    "자이로 센서의 값을 읽어옵니다. (x, y, z) 튜플을 반환합니다.",
+  ],
   ["get_gyro_x", "get_gyro_x()", "자이로 센서의 x축 변화 값을 읽어옵니다."],
   ["get_gyro_y", "get_gyro_y()", "자이로 센서의 y축 변화 값을 읽어옵니다."],
   ["get_gyro_z", "get_gyro_z()", "자이로 센서의 z축 변화 값을 읽어옵니다."],
+  [
+    "get_gyro_accum",
+    "get_gyro_accum()",
+    "자이로 센서의 변화 누적값을 읽어옵니다. (x, y, z) 튜플을 반환합니다.",
+  ],
   [
     "get_gyro_accum_x",
     "get_gyro_accum_x()",
@@ -70,6 +85,22 @@ const serverCodeCompletionRawList: string[][] = [
     "센서로부터 받아 저장해놓은 데이터를 읽어옵니다.",
   ],
   ["display", 'display("이름", 값)', "모니터에 값을 출력합니다."],
+  [
+    "act_led",
+    'act_led("이름", "색상값")',
+    "LED를 제어합니다. #000이면 검은색, #fff면 흰색입니다.",
+  ],
+  [
+    "act_buzzer",
+    'act_buzzer("이름", 헤르츠주파수, 밀리초길이)',
+    "부저를 울립니다.",
+  ],
+  ["act_motor", 'act_motor("이름", RPM값)', "모터를 제어합니다."],
+  [
+    "act_servo",
+    'act_servo("이름", 각도값)',
+    "서보모터를 제어합니다. 각도는 0 ~ 360 사이입니다.",
+  ],
 ];
 
 export const serverCodeCompletionProvider: languages.CompletionItemProvider = {

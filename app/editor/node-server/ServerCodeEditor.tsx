@@ -1,7 +1,7 @@
 "use client";
 
 import { serverDefaultCode } from "@/_misc";
-import { _serverCode } from "@/_recoil/server";
+import { _serverCode } from "@/_recoil/editor";
 import { Typography } from "antd";
 import PythonCodeEditor from "../PythonCodeEditor";
 

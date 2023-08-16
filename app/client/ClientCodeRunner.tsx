@@ -99,15 +99,19 @@ export default function ClientCodeRunner() {
           const msg = decodeB64Bytes(b64_msg);
           setPrintedLog((prev) => [...prev, msg]);
         },
-        send: (b64_name: string, b64_msg: string) => {
-          const name = decodeB64Bytes(b64_name);
-          const msgRaw = decodeB64Bytes(b64_msg);
-          const msg = JSON.parse(msgRaw);
-          console.log("send[from-py]", name, msg);
-          const req: SaveDataRequest = {
-            name,
-            data: msg,
-          };
+        send: (data: string[][]) => {
+          const req: SaveDataRequest = [];
+          for (const [b64_name, b64_msg] of data) {
+            const name = decodeB64Bytes(b64_name);
+            const msgRaw = decodeB64Bytes(b64_msg);
+            const msg = JSON.parse(msgRaw);
+            const reqPartial = {
+              name,
+              data: msg,
+            };
+            req.push(reqPartial);
+          }
+          console.log("send[from-py]", req);
           fetch(serverEndpoint, {
             method: "POST",
             headers: {

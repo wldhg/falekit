@@ -9,12 +9,14 @@ import {
   useRecoilValue,
   useSetRecoilState,
 } from "@/_recoil/client";
-import { useEffect } from "react";
+import { Button, Modal } from "antd";
+import { useEffect, useState } from "react";
 
 export default function SensorManager() {
   const setIsSensorReady = useSetRecoilState(_isSensorReady);
   const setCurrentSensorData = useSetRecoilState(_currentSensorData);
   const [resetRotAccum, setResetRotAccum] = useRecoilState(_resetRotAccum);
+  const [modalOnClick, setModalOnClick] = useState<null | (() => void)>(null);
   const messageApi = useRecoilValue(_messageApi);
 
   useEffect(() => {
@@ -93,7 +95,7 @@ export default function SensorManager() {
     const requestPermissionSafari = () => {
       if (isPermissionRequestRequired) {
         // @ts-ignore-next-line
-        window.DeviceMotionEvent.requestPermission()
+        return window.DeviceMotionEvent.requestPermission()
           .then((state: string) => {
             if (state === "granted") {
               window.addEventListener("devicemotion", dmhandler);
@@ -108,18 +110,48 @@ export default function SensorManager() {
             messageApi?.error(`센서 권한 취득 실패 (C: ${e?.message})`);
           });
       } else {
-        window.addEventListener("devicemotion", dmhandler);
-        setIsSensorReady(true);
-        messageApi?.success("센서 준비됨");
+        return new Promise((resolve) => {
+          window.addEventListener("devicemotion", dmhandler);
+          setIsSensorReady(true);
+          messageApi?.success("센서 준비됨");
+          resolve(null);
+        });
       }
     };
 
-    requestPermissionSafari();
+    if (isPermissionRequestRequired) {
+      setModalOnClick(() => () => {
+        requestPermissionSafari().then(() => {
+          setModalOnClick(null);
+        });
+      });
+    } else {
+      requestPermissionSafari();
+    }
 
     return () => {
       window.removeEventListener("devicemotion", dmhandler);
     };
   }, [setIsSensorReady, setCurrentSensorData, messageApi]);
 
-  return null;
+  return (
+    <Modal
+      title="모션 센서 권한 요청"
+      open={modalOnClick !== null}
+      maskClosable={false}
+      keyboard={false}
+      closeIcon={false}
+      footer={
+        <Button type="primary" onClick={modalOnClick || (() => {})}>
+          수락
+        </Button>
+      }
+    >
+      <p>이 디바이스에서 센서 데이터를 얻고자 합니다.</p>
+      <p>
+        수집된 센서 데이터는 교육 진행을 위해 Falekit 실행 데스크톱으로만 전송
+        및 저장되며, 다른 용도의 전송 혹은 사용은 발생하지 않습니다.
+      </p>
+    </Modal>
+  );
 }

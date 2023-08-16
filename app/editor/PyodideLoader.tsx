@@ -4,7 +4,7 @@ import {
   _isPyodideAvailable,
   _pyodide,
   useSetRecoilState,
-} from "@/_recoil/server";
+} from "@/_recoil/editor";
 import {
   PyodideInterface,
   version as PyodideVersion,

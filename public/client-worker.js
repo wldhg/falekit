@@ -50,9 +50,7 @@ self.__falekit = {
   while (self.__falekit.exit_code === null) {
     self.__falekit.data = await self.getValueFromMain("get_data", []);
     await self.pyodide.runPythonAsync(script);
-    for (const data of self.__falekit.send_list) {
-      self.getValueFromMain("send", data);
-    }
+    self.getValueFromMain("send", [self.__falekit.send_list]);
     self.__falekit.send_list = [];
   }
 

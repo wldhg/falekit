@@ -1,5 +1,9 @@
-const ServerMainPage = () => {
-  return null;
-};
+import MonitorFrame from "./MonitorFrame";
 
-export default ServerMainPage;
+export default function MonitorPage() {
+  return (
+    <>
+      <MonitorFrame />
+    </>
+  );
+}

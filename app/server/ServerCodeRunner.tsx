@@ -3,6 +3,7 @@ import {
   _isCodeRunning,
   _messageApi,
   _printedLog,
+  _serverActuatorData,
   _serverCodeOnMonitor,
   _serverMonitorData,
   _themeName,
@@ -19,7 +20,6 @@ import {
   atomOneLight,
 } from "react-syntax-highlighter/dist/esm/styles/hljs";
 
-const serverEndpoint = "/backend/load-data";
 const workerURL = "/server-worker.js";
 
 function decodeB64Bytes(base64: string): string {
@@ -39,6 +39,7 @@ export default function ServerCodeRunner() {
   const [printedLog, setPrintedLog] = useRecoilState(_printedLog);
   const setWorkerStatus = useSetRecoilState(_workerStatus);
   const setServerMonitorData = useSetRecoilState(_serverMonitorData);
+  const setServerActuatorData = useSetRecoilState(_serverActuatorData);
   const [exitCode, setExitCode] = useState<number | null>(null);
   const logRef = useRef<HTMLDivElement>(null);
 
@@ -85,6 +86,49 @@ export default function ServerCodeRunner() {
             };
           }
           setServerMonitorData((prev) => ({ ...prev, [name]: data_to_save }));
+        },
+        action: (
+          act_type: string,
+          b64_name: string,
+          some_data1: any,
+          some_data2: any = null
+        ) => {
+          const name = decodeB64Bytes(b64_name);
+
+          if (act_type === "led") {
+            setServerActuatorData((prev) => ({
+              ...prev,
+              [name]: {
+                type: "led",
+                color: decodeB64Bytes(some_data1),
+              },
+            }));
+          } else if (act_type === "buzzer") {
+            setServerActuatorData((prev) => ({
+              ...prev,
+              [name]: {
+                type: "buzzer",
+                status: (some_data1 as number) == 1 ? "on" : "off",
+                frequency: some_data2 as number,
+              },
+            }));
+          } else if (act_type === "motor") {
+            setServerActuatorData((prev) => ({
+              ...prev,
+              [name]: {
+                type: "motor",
+                rpm: some_data1 as number,
+              },
+            }));
+          } else if (act_type === "servo") {
+            setServerActuatorData((prev) => ({
+              ...prev,
+              [name]: {
+                type: "servo",
+                angle: some_data1 as number,
+              },
+            }));
+          }
         },
         finished: (code: number) => {
           setIsCodeRunning(false);
@@ -138,6 +182,7 @@ export default function ServerCodeRunner() {
     setIsCodeRunning,
     setWorkerStatus,
     setServerMonitorData,
+    setServerActuatorData,
   ]);
 
   useEffect(() => {

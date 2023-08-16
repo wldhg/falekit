@@ -15,7 +15,7 @@ import {
   _themeName,
   useRecoilState,
   useRecoilValue,
-} from "@/_recoil/server";
+} from "@/_recoil/editor";
 import { CheckOutlined } from "@ant-design/icons";
 import Editor, { Monaco } from "@monaco-editor/react";
 import {

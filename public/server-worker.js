@@ -39,6 +39,7 @@ self.__falekit = {
   },
   exit_code: null,
   disp_list: [],
+  act_list: [],
 };
 
 (async () => {
@@ -64,7 +65,11 @@ self.__falekit = {
     for (const data of self.__falekit.disp_list) {
       self.getValueFromMain("display", data);
     }
+    for (const data of self.__falekit.act_list) {
+      self.getValueFromMain("action", data);
+    }
     self.__falekit.disp_list = [];
+    self.__falekit.act_list = [];
   }
 
   self.getValueFromMain("status", ["종료 중"]);
