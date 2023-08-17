@@ -230,7 +230,7 @@ validate("""${value.replace(/"""/g, "'''")}""")
       return () => {
         if (
           isOnRendering &&
-          renderTargetPath !== `/server/editor/node-${props.saveType}`
+          renderTargetPath !== `/editor/node-${props.saveType}`
         ) {
           requestToRemoteSave(true);
         }

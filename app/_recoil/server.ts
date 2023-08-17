@@ -33,7 +33,8 @@ interface ServerMonitorData {
     | {
         x: number[];
         y: number[];
-      }
+        name?: string;
+      }[]
     | string
     | boolean;
 }

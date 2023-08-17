@@ -75,15 +75,43 @@ export default function ServerCodeRunner() {
           if (Array.isArray(data_json) && Array.isArray(data_json[0])) {
             const x = data_json[0];
             const y = data_json[1];
-            data_to_save = {
-              x,
-              y,
-            };
+            data_to_save = [
+              {
+                x,
+                y,
+              },
+            ];
           } else if (Array.isArray(data_json)) {
-            data_to_save = {
-              x: data_json.map((_, i) => i),
-              y: data_json,
-            };
+            data_to_save = [
+              {
+                x: data_json.map((_, i) => i),
+                y: data_json,
+              },
+            ];
+          } else if (typeof data_json === "object") {
+            const data_keys = Object.keys(data_json);
+            const data_values: any[][] = Object.values(data_json);
+            data_to_save = [];
+            for (let i = 0; i < data_keys.length; i++) {
+              if (
+                Array.isArray(data_values[i]) &&
+                Array.isArray(data_values[i][0])
+              ) {
+                const x = data_values[i][0];
+                const y = data_values[i][1];
+                data_to_save.push({
+                  x,
+                  y,
+                  name: data_keys[i],
+                });
+              } else if (Array.isArray(data_values[i])) {
+                data_to_save.push({
+                  x: data_values[i].map((_, i) => i),
+                  y: data_values[i],
+                  name: data_keys[i],
+                });
+              }
+            }
           }
           setServerMonitorData((prev) => ({ ...prev, [name]: data_to_save }));
         },

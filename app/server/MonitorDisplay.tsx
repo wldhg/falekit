@@ -117,28 +117,31 @@ function MonitorDisplayPlot(props: {
   data: {
     x: number[];
     y: number[];
-  };
+    name?: string;
+  }[];
 }) {
   return (
     <MonitorBlockBase title={props.title} bottomPadding>
       <Plot
-        data={[
-          {
-            x: props.data.x,
-            y: props.data.y,
-            type: "scatter",
-            mode: "lines+markers",
-            marker: { color: "blue" },
-          },
-        ]}
+        data={props.data.map((data, index) => ({
+          x: data.x,
+          y: data.y,
+          name: data?.name ?? `Series ${index + 1}`,
+          type: typeof data.x[0] === "string" ? "bar" : "scatter",
+          mode: "lines+markers",
+        }))}
         layout={{
-          width: 300,
-          height: 160,
+          width: 320,
+          height: 200,
           margin: {
-            l: 0,
-            r: 0,
-            b: 0,
-            t: 0,
+            l: 40,
+            r: 25,
+            b: 20,
+            t: 20,
+          },
+          legend: {
+            orientation: "h",
+            y: 1.1,
           },
         }}
       />
@@ -311,8 +314,6 @@ function MonitorActuatorServo(props: {
     angle: number;
   };
 }) {
-  const isCodeRunning = useRecoilValue(_isCodeRunning);
-
   return (
     <MonitorBlockBase
       title={
