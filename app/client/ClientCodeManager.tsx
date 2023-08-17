@@ -30,6 +30,7 @@ export default function ClientCodeManager() {
   const workerStatus = useRecoilValue(_workerStatus);
   const messageApi = useRecoilValue(_messageApi);
   const [isCodeLoading, setIsCodeLoading] = useState(false);
+  const [isCodeValid, setIsCodeValid] = useState(false);
   const {
     token: { colorBorder, borderRadius },
   } = theme.useToken();
@@ -40,7 +41,10 @@ export default function ClientCodeManager() {
       .then((res) => res.json())
       .then((res: FaleGreenResponse | FaleRedResponse) => {
         if (res.code === "green") {
-          setClientCode(res.data);
+          const code = res.data.slice(2);
+          const isValid = res.data[0] === "1";
+          setClientCode(code);
+          setIsCodeValid(isValid);
           setLastTimeCodeLoaded(Date.now());
         } else {
           messageApi?.error({
@@ -61,8 +65,10 @@ export default function ClientCodeManager() {
   if (lastTimeCodeLoaded > 0) {
     if (isCodeRunning) {
       clientStatus = workerStatus;
-    } else {
+    } else if (isCodeValid) {
       clientStatus = "실행 가능";
+    } else {
+      clientStatus = "실행 불가 (구문 오류)";
     }
   }
   if (!isSensorReady) {
@@ -144,7 +150,12 @@ export default function ClientCodeManager() {
         type="primary"
         danger={isCodeRunning}
         onClick={isCodeRunning ? stopClientCode : runClientCode}
-        disabled={!isSensorReady || lastTimeCodeLoaded === 0 || isCodeLoading}
+        disabled={
+          !isSensorReady ||
+          lastTimeCodeLoaded === 0 ||
+          isCodeLoading ||
+          !isCodeValid
+        }
         style={{ width: "100%", fontSize: "1.2rem", height: "3rem" }}
       >
         {isCodeRunning ? "코드 중지" : "코드 실행"}

@@ -73,6 +73,7 @@ export default function ServerCodeEditor(props: {
         const saveRequest: SaveCodeRequest = {
           type: props.saveType,
           code: `${pythonLocalCodeRef.current}`,
+          validity: isPythonCodeValid,
         };
         fetch(props.saveTarget, {
           method: "POST",
@@ -101,7 +102,7 @@ export default function ServerCodeEditor(props: {
           });
       }
     },
-    [messageApi, props.saveTarget, props.saveType]
+    [messageApi, props.saveTarget, props.saveType, isPythonCodeValid]
   );
 
   const ctrlSAction = useCallback(() => {
@@ -167,7 +168,7 @@ def validate(code):
         return str(e)
     return None
 
-validate("""${value.replace(/"""/g, "'''")}""")
+validate("""\n${value.replace(/"""/g, "'''").replace(/\\/g, "\\\\")}\n""")
           `);
           if (syntaxError) {
             throw new Error(String(syntaxError));
@@ -277,6 +278,48 @@ validate("""${value.replace(/"""/g, "'''")}""")
     validityMessage = "코드 구문 분석 준비 중입니다... 잠시만 기다려 주세요.";
   }
 
+  const handleFileOpen = () => {
+    if (editorRef.current) {
+      try {
+        const fileInput = document.createElement("input");
+        fileInput.type = "file";
+        fileInput.accept = ".py";
+        fileInput.onchange = (e) => {
+          const file = (e.target as HTMLInputElement).files?.[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const text = e.target?.result;
+              if (typeof text === "string") {
+                handleEditorChange(text);
+                messageApi?.success(`${file.name} 불러옴`);
+              }
+            };
+            reader.readAsText(file);
+          }
+        };
+        fileInput.click();
+      } catch (e) {
+        console.log(e);
+        messageApi?.error("파일 열기 실패");
+      }
+    }
+  };
+
+  const handleDownload = () => {
+    if (editorRef.current) {
+      const blob = new Blob([editorRef.current.getValue()], {
+        type: "text/plain;charset=utf-8",
+      });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `FaleKit-${props.saveType}-${new Date().toISOString()}.py`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    }
+  };
+
   return (
     <div
       style={{
@@ -290,8 +333,18 @@ validate("""${value.replace(/"""/g, "'''")}""")
           <Space>
             <Button
               disabled={!isMonacoMounted}
+              type="primary"
+              onClick={handleDownload}
+            >
+              다운로드
+            </Button>
+            <Button disabled={!isMonacoMounted} onClick={handleFileOpen}>
+              열기
+            </Button>
+            <Button
+              disabled={!isMonacoMounted}
               onClick={initValue}
-              danger={isInitializationRequested}
+              danger
               type={isInitializationRequested ? "primary" : "default"}
             >
               코드 초기화

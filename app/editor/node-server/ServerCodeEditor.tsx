@@ -18,7 +18,8 @@ export default function ServerCodeEditor() {
       <div style={{ paddingBottom: 16 }}>
         <Typography.Title level={2}>서버 코드 편집기</Typography.Title>
         <Typography.Text>
-          서버가 센서로부터 받은 데이터를 이용해 수행할 로직을 구성하세요.
+          서버가 센서로부터 받아 저장된 데이터를 이용해 수행할 로직을
+          구성하세요.
         </Typography.Text>
       </div>
       <PythonCodeEditor

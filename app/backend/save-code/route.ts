@@ -13,9 +13,17 @@ export async function POST(request: NextRequest) {
 
     if (body.type === "server") {
       fs.writeFileSync(tempServerCodePath, body.code);
+      fs.writeFileSync(
+        tempServerCodePath + ".validity",
+        body.validity ? "1" : "0"
+      );
       return NextResponse.json(faleGreen("Saved server code"));
     } else if (body.type === "client") {
       fs.writeFileSync(tempClientCodePath, body.code);
+      fs.writeFileSync(
+        tempClientCodePath + ".validity",
+        body.validity ? "1" : "0"
+      );
       return NextResponse.json(faleGreen("Saved client code"));
     } else {
       throw new Error("Invalid code type");

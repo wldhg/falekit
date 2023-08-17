@@ -28,6 +28,7 @@ export default function ServerCodeManager() {
   const workerStatus = useRecoilValue(_workerStatus);
   const messageApi = useRecoilValue(_messageApi);
   const [isCodeLoading, setIsCodeLoading] = useState(false);
+  const [isCodeValid, setIsCodeValid] = useState(false);
   const {
     token: { colorBorder, borderRadius },
   } = theme.useToken();
@@ -38,7 +39,10 @@ export default function ServerCodeManager() {
       .then((res) => res.json())
       .then((res: FaleGreenResponse | FaleRedResponse) => {
         if (res.code === "green") {
-          setServerCode(res.data);
+          const code = res.data.slice(2);
+          const isValid = res.data[0] === "1";
+          setServerCode(code);
+          setIsCodeValid(isValid);
           setLastTimeCodeLoaded(Date.now());
         } else {
           messageApi?.error({
@@ -59,8 +63,10 @@ export default function ServerCodeManager() {
   if (lastTimeCodeLoaded > 0) {
     if (isCodeRunning) {
       clientStatus = workerStatus;
-    } else {
+    } else if (isCodeValid) {
       clientStatus = "실행 가능";
+    } else {
+      clientStatus = "실행 불가 (구문 오류)";
     }
   }
 
@@ -131,7 +137,7 @@ export default function ServerCodeManager() {
             type="primary"
             danger={isCodeRunning}
             onClick={isCodeRunning ? stopClientCode : runClientCode}
-            disabled={lastTimeCodeLoaded === 0 || isCodeLoading}
+            disabled={lastTimeCodeLoaded === 0 || isCodeLoading || !isCodeValid}
             style={{ width: "100%", fontSize: "1.2rem", height: "3rem" }}
           >
             {isCodeRunning ? "코드 중지" : "코드 실행"}
