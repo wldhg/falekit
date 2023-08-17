@@ -3,8 +3,13 @@ const fs = require("fs");
 const os = require("os");
 const proxy = require("http-proxy");
 
-const SSL_KEY_PATH = path.join(__dirname, "../assets/localhost.key");
-const SSL_CERT_PATH = path.join(__dirname, "../assets/localhost.crt");
+let SSL_KEY_PATH = path.join(__dirname, "../assets/custom.key");
+if (!fs.existsSync(SSL_KEY_PATH))
+  SSL_KEY_PATH = path.join(__dirname, "../assets/localhost.key");
+
+let SSL_CERT_PATH = path.join(__dirname, "../assets/custom.crt");
+if (!fs.existsSync(SSL_CERT_PATH))
+  SSL_CERT_PATH = path.join(__dirname, "../assets/localhost.crt");
 
 console.log(`Proxying below to https://0.0.0.0:3000`);
 

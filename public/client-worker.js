@@ -38,13 +38,7 @@ self.__falekit = {
   self.pyodide = await loadPyodide();
 
   self.getValueFromMain("status", ["Python 패키지 로드 중"]);
-  await self.pyodide.loadPackage([
-    "numpy",
-    "pandas",
-    "scipy",
-    "tqdm",
-    "scikit-learn",
-  ]);
+  await self.pyodide.loadPackage(["numpy", "pandas", "scipy", "scikit-learn"]);
 
   self.getValueFromMain("status", ["실행 중"]);
   while (self.__falekit.exit_code === null) {
