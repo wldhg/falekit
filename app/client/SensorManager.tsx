@@ -52,15 +52,15 @@ export default function SensorManager() {
       let beta = -10000;
       let gamma = -10000;
 
-      if (e.acceleration !== null) {
-        if (e.acceleration.x !== null) {
-          x = e.acceleration.x;
+      if (e.accelerationIncludingGravity !== null) {
+        if (e.accelerationIncludingGravity.x !== null) {
+          x = e.accelerationIncludingGravity.x;
         }
-        if (e.acceleration.y !== null) {
-          y = e.acceleration.y;
+        if (e.accelerationIncludingGravity.y !== null) {
+          y = e.accelerationIncludingGravity.y;
         }
-        if (e.acceleration.z !== null) {
-          z = e.acceleration.z;
+        if (e.accelerationIncludingGravity.z !== null) {
+          z = e.accelerationIncludingGravity.z;
         }
       }
 
