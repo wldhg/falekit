@@ -78,18 +78,18 @@ function XYZArrows() {
     <group ref={arrowGroupRef}>
       <Arrow
         color="red"
-        arrowLength={Math.abs(x) + 0.5}
-        arrowDirection={[1, 0, 0]}
+        arrowLength={Math.log(Math.abs(x) * Math.E + Math.E)}
+        arrowDirection={[0, 0, -1]}
       />
       <Arrow
         color="green"
-        arrowLength={Math.abs(y) + 0.5}
-        arrowDirection={[0, 1, 0]}
+        arrowLength={Math.log(Math.abs(y) * Math.E + Math.E)}
+        arrowDirection={[0, -1, 0]}
       />
       <Arrow
         color="blue"
-        arrowLength={Math.abs(z) + 0.5}
-        arrowDirection={[0, 0, 1]}
+        arrowLength={Math.log(Math.abs(z) * Math.E + Math.E)}
+        arrowDirection={[1, 0, 0]}
       />
     </group>
   );
