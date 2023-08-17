@@ -232,7 +232,7 @@ export default function ServerCodeRunner() {
           backgroundColor: themeName === "dark" ? "#292c33" : "#fafafa",
           border: `1px solid ${colorBorder}`,
           borderRadius: borderRadius,
-          maxWidth: "calc(100vw - 32px)",
+          maxWidth: "260px",
           overflow: "hidden",
           marginTop: 8,
         }}
@@ -244,8 +244,8 @@ export default function ServerCodeRunner() {
           customStyle={{
             fontFamily: "'Fira Mono', monospace",
             maxHeight: "15vh",
-            maxWidth: "calc(100vw - 32px)",
-            width: "calc(100vw - 32px)",
+            maxWidth: "260px",
+            width: "260px",
           }}
         >
           {printedLog.join("") +

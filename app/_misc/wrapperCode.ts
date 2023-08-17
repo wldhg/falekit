@@ -72,6 +72,7 @@ except Exception as e:
 
 export const serverWrapperCodePre = `
 from pyodide.code import run_js as _run_js
+from pyodide.ffi import JsProxy
 from io import StringIO
 import json as _wrap_json
 import base64 as _wrap_base64
@@ -89,7 +90,11 @@ def print(*args, **kwargs):
     _run_js(f"self.__falekit.print('{value_b64}')")
 
 def get_data(name, cnt):
-    return _run_js(f"self.queryData('{name}', {cnt})")
+    data = _run_js(f"self.queryData('{name}', {cnt})")
+    if isinstance(data, JsProxy):
+        data = data.to_py()
+    data = [tuple(d) for d in data]
+    return data
 
 def display(name, data):
     json_data = _wrap_json.dumps(data)

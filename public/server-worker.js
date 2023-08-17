@@ -27,7 +27,9 @@ self.queryData = (key, amount) => {
   xhr.send();
   const response = JSON.parse(xhr.responseText);
   if (response.code === "green") {
-    return JSON.parse(response.data);
+    const parsed = JSON.parse(response.data);
+    console.log("XHR Response", parsed);
+    return parsed;
   } else {
     return [];
   }
