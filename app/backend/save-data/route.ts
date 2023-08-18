@@ -57,6 +57,8 @@ export async function POST(request: NextRequest) {
             infoDataContent = JSON.parse(data);
             partialDataProc(body.name, body.data);
           });
+        } else {
+          partialDataProc(body.name, body.data);
         }
       } catch (error: any) {
         console.error(error);
