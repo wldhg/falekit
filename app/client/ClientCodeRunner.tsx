@@ -6,7 +6,8 @@ import type {
 } from "@/_proto";
 import {
   _clientCode,
-  _currentSensorData,
+  _currentMotionData,
+  _currentOrientationData,
   _isCodeRunning,
   _isSensorReady,
   _messageApi,
@@ -41,13 +42,16 @@ export default function ClientCodeRunner() {
   const [isCodeRunning, setIsCodeRunning] = useRecoilState(_isCodeRunning);
   const clientCode = useRecoilValue(_clientCode);
   const isSensorReady = useRecoilValue(_isSensorReady);
-  const currentSensorData = useRecoilValue(_currentSensorData);
+  const currentMotionData = useRecoilValue(_currentMotionData);
+  const currentOrientationData = useRecoilValue(_currentOrientationData);
   const messageApi = useRecoilValue(_messageApi);
   const themeName = useRecoilValue(_themeName);
   const [printedLog, setPrintedLog] = useRecoilState(_printedLog);
   const setWorkerStatus = useSetRecoilState(_workerStatus);
   const [exitCode, setExitCode] = useState<number | null>(null);
-  const sensorDataRef = useRef<number[]>([0, 0, 0, 0, 0, 0, 0]);
+  const sensorDataRef = useRef<number[]>([
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  ]);
   const logRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -56,13 +60,28 @@ export default function ClientCodeRunner() {
 
   useEffect(() => {
     if (isSensorReady) {
-      sensorDataRef.current = currentSensorData;
+      sensorDataRef.current = [
+        currentMotionData[0],
+        currentMotionData[1],
+        currentMotionData[2],
+        currentMotionData[3],
+        currentMotionData[4],
+        currentMotionData[5],
+        currentMotionData[6], // alpha speed (deg / s) = z speed
+        currentMotionData[7], // beta speed (deg / s) = x speed
+        currentMotionData[8], // gamma speed (deg / s) = y speed
+        currentOrientationData[6], // alpha (deg) = z
+        currentOrientationData[7], // beta (deg) = x
+        currentOrientationData[9], // gamma (deg) = y
+        currentMotionData[9],
+      ];
     } else {
       sensorDataRef.current = [
-        -10000, -10000, -10000, -10000, -10000, -10000, -10000,
+        -10000, -10000, -10000, -10000, -10000, -10000, -10000, -10000, -10000,
+        -10000, -10000, -10000, -10000,
       ];
     }
-  }, [isSensorReady, currentSensorData]);
+  }, [isSensorReady, currentMotionData, currentOrientationData]);
 
   useEffect(() => {
     if (isCodeRunning) {
@@ -110,6 +129,9 @@ export default function ClientCodeRunner() {
               data: msg,
             };
             req.push(reqPartial);
+          }
+          if (req.length === 0) {
+            return;
           }
           console.log("send[from-py]", req);
           fetch(serverEndpoint, {

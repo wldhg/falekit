@@ -91,7 +91,8 @@ export const commonFunctionDocs: FunctionDoc[] = [
 export const clientFunctionDocs: FunctionDoc[] = [
   {
     name: "get_accel",
-    description: "가속도 센서의 x, y, z 성분을 튜플로 리턴합니다.",
+    description:
+      "가속도 센서의 x, y, z 성분을 튜플로 리턴합니다. 단위는 m/s²입니다.",
     overridings: [
       {
         args: [],
@@ -107,8 +108,27 @@ export const clientFunctionDocs: FunctionDoc[] = [
     ],
   },
   {
+    name: "get_accng",
+    description:
+      "가속도 센서의 x, y, z 성분을 중력 상수를 제거하고 튜플로 리턴합니다. 단위는 m/s²입니다.",
+    overridings: [
+      {
+        args: [],
+        aliases: {},
+        description:
+          "이외에도 get_accng_x, get_accng_y, get_accng_z 함수를 사용해서 각각의 성분을 받아볼 수 있습니다. 각각 역시 중력 상수가 제거된 값입니다.",
+        returns: {
+          description: "(x, y, z) 성분 튜플",
+          type: "tuple[float, float, float]",
+        },
+        examples: [],
+      },
+    ],
+  },
+  {
     name: "get_gyro",
-    description: "자이로 센서의 x, y, z 성분을 튜플로 리턴합니다.",
+    description:
+      "자이로 센서의 x, y, z 성분을 튜플로 리턴합니다. 단위는 초당 회전 각도입니다.",
     overridings: [
       {
         args: [],
@@ -124,17 +144,35 @@ export const clientFunctionDocs: FunctionDoc[] = [
     ],
   },
   {
-    name: "get_gyro_accum",
-    description: "자이로 센서의 x, y, z 성분 누적값을 튜플로 리턴합니다.",
+    name: "get_rot",
+    description:
+      "회전 센서의 x, y, z 성분을 튜플로 리턴합니다. -180도 ~ 180도 범위입니다.",
     overridings: [
       {
         args: [],
         aliases: {},
         description:
-          "이외에도 get_gyro_accum_x, get_gyro_accum_y, get_gyro_accum_z 함수를 사용해서 각각의 성분을 받아볼 수 있습니다.",
+          "이외에도 get_rot_x, get_rot_y, get_rot_z 함수를 사용해서 각각의 성분을 받아볼 수 있습니다.",
         returns: {
           description: "(x, y, z) 성분 튜플",
           type: "tuple[float, float, float]",
+        },
+        examples: [],
+      },
+    ],
+  },
+  {
+    name: "get_sensor_time",
+    description:
+      "센서에서 데이터를 수집한 (센서 기준) 타임스탬프를 리턴합니다. 센서가 동작하기 시작한 뒤 몇 초가 지났는지가 반환됩니다.",
+    overridings: [
+      {
+        args: [],
+        aliases: {},
+        description: "",
+        returns: {
+          description: "타임스탬프 (초)",
+          type: "float",
         },
         examples: [],
       },

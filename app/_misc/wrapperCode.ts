@@ -29,32 +29,46 @@ def get_accel_y():
 def get_accel_z():
     return float(_run_js("self.__falekit.data[2]"))
 
-def get_gyro():
+def get_accng():
     return tuple(map(float, _run_js("self.__falekit.data.slice(3, 6)")))
 
-def get_gyro_x():
+def get_accng_x():
     return float(_run_js("self.__falekit.data[3]"))
 
-def get_gyro_y():
+def get_accng_y():
     return float(_run_js("self.__falekit.data[4]"))
 
-def get_gyro_z():
+def get_accng_z():
     return float(_run_js("self.__falekit.data[5]"))
 
-def get_gyro_accum():
-    return tuple(map(float, _run_js("self.__falekit.data.slice(6, 9)")))
+def get_gyro():
+    gyro_list = list(map(float, _run_js("self.__falekit.data.slice(6, 9)")))
+    return tuple([gyro_list[1], gyro_list[2], gyro_list[0]])
 
-def get_gyro_accum_x():
-    return float(_run_js("self.__falekit.data[6]"))
-
-def get_gyro_accum_y():
+def get_gyro_x():
     return float(_run_js("self.__falekit.data[7]"))
 
-def get_gyro_accum_z():
+def get_gyro_y():
     return float(_run_js("self.__falekit.data[8]"))
 
-def get_timestamp():
+def get_gyro_z():
+    return float(_run_js("self.__falekit.data[6]"))
+
+def get_rot():
+    rot_list = list(map(float, _run_js("self.__falekit.data.slice(9, 12)")))
+    return tuple([rot_list[1], rot_list[2], rot_list[0]])
+
+def get_rot_x():
+    return float(_run_js("self.__falekit.data[10]"))
+
+def get_rot_y():
+    return float(_run_js("self.__falekit.data[11]"))
+
+def get_rot_z():
     return float(_run_js("self.__falekit.data[9]"))
+
+def get_sensor_time():
+    return float(_run_js("self.__falekit.data[12]")) / 1000.0
 
 def send(name, data):
     json_data = _wrap_json.dumps(data)
@@ -63,9 +77,10 @@ def send(name, data):
     _run_js(f"self.__falekit.send_list.push(['{name_b64}', '{json_data_b64}'])")
 
 def save(name, data):
+    name_b64 = _wrap_base64.b64encode(name.encode('utf-8')).decode('utf-8')
     pkl_data = _wrap_pickle.dumps(data)
     pkl_data_b64 = _wrap_base64.b64encode(pkl_data).decode('utf-8')
-    _run_js(f"self.__falekit.save_obj['{name_b64}'] = '{json_data_b64}'")
+    _run_js(f"self.__falekit.save_obj['{name_b64}'] = '{pkl_data_b64}'")
 
 def load(name):
     name_b64 = _wrap_base64.b64encode(name.encode('utf-8')).decode('utf-8')
@@ -145,9 +160,10 @@ def act_buzzer(name, onoff, freq=-1):
     _run_js(f"self.__falekit.act_list.push(['buzzer', '{name_b64}', {onoff_int}, {freq_float}])")
 
 def save(name, data):
+    name_b64 = _wrap_base64.b64encode(name.encode('utf-8')).decode('utf-8')
     pkl_data = _wrap_pickle.dumps(data)
     pkl_data_b64 = _wrap_base64.b64encode(pkl_data).decode('utf-8')
-    _run_js(f"self.__falekit.save_obj['{name_b64}'] = '{json_data_b64}'")
+    _run_js(f"self.__falekit.save_obj['{name_b64}'] = '{pkl_data_b64}'")
 
 def load(name):
     name_b64 = _wrap_base64.b64encode(name.encode('utf-8')).decode('utf-8')

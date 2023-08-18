@@ -81,6 +81,7 @@ export default function ServerCodeEditor(props: {
   const waitForNoInputToValidateTimeoutRef = useRef<NodeJS.Timeout>();
   const leftSiderPrevStateRef = useRef<boolean>(isLeftSiderCollapsed);
   const monacoDispose1Ref = useRef<() => void>();
+  const ctrlSActionRef = useRef<() => void>();
 
   useEffect(() => {
     const setMonacoSize = (addi: number = 0) => {
@@ -172,6 +173,8 @@ export default function ServerCodeEditor(props: {
 
       return false;
     });
+
+    ctrlSActionRef.current = ctrlSAction;
 
     return () => {
       hotkeys.unbind("ctrl+s, command+s");
@@ -311,7 +314,9 @@ validate("""\n${value.replace(/"""/g, "'''").replace(/\\/g, "\\\\")}\n""")
   ) => {
     editorRef.current = editor;
     editor.addCommand(KeyMod.CtrlCmd | KeyCode.KeyS, function () {
-      ctrlSAction();
+      if (ctrlSActionRef.current) {
+        ctrlSActionRef.current();
+      }
     });
     if (props.completionProvider) {
       const { dispose } = monaco.languages.registerCompletionItemProvider(

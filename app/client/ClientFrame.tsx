@@ -93,7 +93,7 @@ export default function ClientFrame() {
               size="small"
               type="primary"
             >
-              자이로(회전) 센서 누적값 초기화
+              회전 센서 원점 보정
             </Button>
           </Col>
         </Row>

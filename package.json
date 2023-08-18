@@ -38,6 +38,7 @@
     "react-plotly.js": "^2.6.0",
     "react-syntax-highlighter": "^15.5.0",
     "recoil": "^0.7.7",
+    "sharp": "^0.32.5",
     "three": "^0.155.0",
     "tone": "^14.7.77",
     "typescript": "5.1.6"

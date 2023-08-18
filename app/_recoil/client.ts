@@ -2,9 +2,14 @@ import { atom } from "recoil";
 
 export * from "./root";
 
-export const _currentSensorData = atom<number[]>({
-  key: "currentSensorData",
+export const _currentMotionData = atom<number[]>({
+  key: "currentMotionData",
   default: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+});
+
+export const _currentOrientationData = atom<number[]>({
+  key: "currentOrientationData",
+  default: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 });
 
 export const _isSensorReady = atom<boolean>({

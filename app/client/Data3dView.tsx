@@ -1,6 +1,10 @@
 "use client";
 
-import { _currentSensorData, useRecoilValue } from "@/_recoil/client";
+import {
+  _currentMotionData,
+  _currentOrientationData,
+  useRecoilValue,
+} from "@/_recoil/client";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
@@ -57,20 +61,44 @@ function Arrow(props: {
 }
 
 function XYZArrows() {
-  const currentSensorData = useRecoilValue(_currentSensorData);
+  const currentMotionData = useRecoilValue(_currentMotionData);
+  const currentOrientationData = useRecoilValue(_currentOrientationData);
   const arrowGroupRef = useRef<any>();
-  const [x, y, z, alpha, beta, gamma, alphaacc, betaacc, gammaacc, timestamp] =
-    currentSensorData;
+  const [
+    acc_x,
+    acc_y,
+    acc_z,
+    acc_x_ng,
+    acc_y_ng,
+    acc_z_ng,
+    alphadelta,
+    betadelta,
+    gammadelta,
+  ] = currentMotionData;
+  const [
+    alpha,
+    beta,
+    gamma,
+    alpharef,
+    betaref,
+    gammaref,
+    alphafinal,
+    betafinal,
+    gammafinal_notfixed,
+    gammafinal,
+    gammaflip,
+    timestamp,
+  ] = currentOrientationData;
 
   useFrame(() => {
     if (arrowGroupRef.current) {
       const arrowGroup = arrowGroupRef.current;
 
-      arrowGroup.rotation.set(
-        betaacc / 360 / Math.PI / Math.PI,
-        alphaacc / 360 / Math.PI / Math.PI,
-        -gammaacc / 360 / Math.PI / Math.PI
-      );
+      const alphause = -(alphafinal / 180) * Math.PI;
+      const betause = -(betafinal / 180) * Math.PI;
+      const gammause = -(gammafinal / 180) * Math.PI;
+
+      arrowGroup.rotation.set(betause, gammause, alphause);
     }
   });
 
@@ -78,17 +106,17 @@ function XYZArrows() {
     <group ref={arrowGroupRef}>
       <Arrow
         color="red"
-        arrowLength={Math.log(Math.abs(x) * Math.E + Math.E)}
+        arrowLength={Math.log(Math.abs(acc_x) * Math.E + Math.E)}
         arrowDirection={[0, 0, -1]}
       />
       <Arrow
         color="green"
-        arrowLength={Math.log(Math.abs(y) * Math.E + Math.E)}
+        arrowLength={Math.log(Math.abs(acc_y) * Math.E + Math.E)}
         arrowDirection={[0, -1, 0]}
       />
       <Arrow
         color="blue"
-        arrowLength={Math.log(Math.abs(z) * Math.E + Math.E)}
+        arrowLength={Math.log(Math.abs(acc_z) * Math.E + Math.E)}
         arrowDirection={[1, 0, 0]}
       />
     </group>
