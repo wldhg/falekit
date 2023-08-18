@@ -75,6 +75,9 @@ def load(name):
     pkl_data = _wrap_base64.b64decode(pkl_data_b64)
     return _wrap_pickle.loads(pkl_data)
 
+def get_repeat_idx():
+    return int(_run_js("self.__falekit.repeat_idx"))
+
 try:
 `;
 
@@ -153,6 +156,9 @@ def load(name):
         return None
     pkl_data = _wrap_base64.b64decode(pkl_data_b64)
     return _wrap_pickle.loads(pkl_data)
+
+def get_repeat_idx():
+    return int(_run_js("self.__falekit.repeat_idx"))
 
 try:
 `;

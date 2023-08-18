@@ -9,6 +9,7 @@ import {
 const commonCompletionRawList: string[][] = [
   ["load", 'load("식별자")', "저장한 로컬 데이터를 불러옵니다."],
   ["save", 'save("식별자", 값)', "로컬에 데이터를 저장합니다."],
+  ["get_repeat_idx", "get_repeat_idx()", "현재 반복 실행 횟수를 리턴합니다."],
 ];
 
 const clientCodeCompletionRawList: string[][] = [

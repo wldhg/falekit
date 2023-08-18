@@ -28,6 +28,7 @@ self.__falekit = {
   exit_code: null,
   send_list: [],
   save_obj: {},
+  repeat_idx: 0,
 };
 
 (async () => {
@@ -47,6 +48,7 @@ self.__falekit = {
     await self.pyodide.runPythonAsync(script);
     self.getValueFromMain("send", [self.__falekit.send_list]);
     self.__falekit.send_list = [];
+    self.__falekit.repeat_idx += 1;
   }
 
   self.getValueFromMain("status", ["종료 중"]);

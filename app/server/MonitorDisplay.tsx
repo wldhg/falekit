@@ -434,6 +434,33 @@ export default function MonitorDisplay() {
     setServerActuatorData({});
   };
 
+  const backupData = () => {
+    fetch("/backend/backup-data", { method: "GET" })
+      .then((res) => {
+        if (res.status === 200) {
+          return res.json();
+        } else {
+          console.log("backup error", res);
+          messageApi?.error("데이터 백업 실패 (요청 오류)");
+        }
+      })
+      .then((res: FaleGreenResponse | FaleRedResponse | null) => {
+        if (res !== null) {
+          if (res.code === "green") {
+            const zipBase64 = res.data;
+            const zipBlob = Buffer.from(zipBase64, "base64");
+            const zipBlobUrl = URL.createObjectURL(new Blob([zipBlob]));
+            const a = document.createElement("a");
+            a.href = zipBlobUrl;
+            a.download = `FaleKit-data-${new Date().toISOString()}.zip`;
+            a.click();
+          } else {
+            messageApi?.error("데이터 백업 실패 (서버 오류)");
+          }
+        }
+      });
+  };
+
   return (
     <Space
       style={{
@@ -454,13 +481,22 @@ export default function MonitorDisplay() {
           />
         </Col>
         <Col>
+          <Button
+            onClick={requestInitData}
+            danger
+            style={{ marginRight: "8px" }}
+          >
+            데이터 초기화
+          </Button>
+        </Col>
+        <Col>
           <Button onClick={initMonitor} style={{ marginRight: "8px" }}>
             모니터 초기화
           </Button>
         </Col>
         <Col>
-          <Button onClick={requestInitData} danger>
-            데이터 초기화
+          <Button onClick={backupData} type="primary">
+            데이터 다운로드
           </Button>
         </Col>
       </Row>

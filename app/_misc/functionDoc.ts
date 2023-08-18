@@ -70,6 +70,22 @@ export const commonFunctionDocs: FunctionDoc[] = [
       },
     ],
   },
+  {
+    name: "get_repeat_idx",
+    description: "현재 반복 실행 횟수를 리턴합니다.",
+    overridings: [
+      {
+        args: [],
+        aliases: {},
+        description: "",
+        returns: {
+          description: "현재 반복 횟수 (0부터 시작)",
+          type: "int",
+        },
+        examples: [],
+      },
+    ],
+  },
 ];
 
 export const clientFunctionDocs: FunctionDoc[] = [

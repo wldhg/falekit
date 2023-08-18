@@ -43,6 +43,7 @@ self.__falekit = {
   disp_list: [],
   act_list: [],
   save_obj: {},
+  repeat_idx: 0,
 };
 
 (async () => {
@@ -67,6 +68,7 @@ self.__falekit = {
     }
     self.__falekit.disp_list = [];
     self.__falekit.act_list = [];
+    self.__falekit.repeat_idx += 1;
   }
 
   self.getValueFromMain("status", ["종료 중"]);
