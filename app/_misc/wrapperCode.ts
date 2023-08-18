@@ -4,6 +4,7 @@ from io import StringIO
 import json as _wrap_json
 import base64 as _wrap_base64
 import builtins
+import pickle as _wrap_pickle
 
 _capture_out = StringIO()
 
@@ -61,6 +62,19 @@ def send(name, data):
     name_b64 = _wrap_base64.b64encode(name.encode('utf-8')).decode('utf-8')
     _run_js(f"self.__falekit.send_list.push(['{name_b64}', '{json_data_b64}'])")
 
+def save(name, data):
+    pkl_data = _wrap_pickle.dumps(data)
+    pkl_data_b64 = _wrap_base64.b64encode(pkl_data).decode('utf-8')
+    _run_js(f"self.__falekit.save_obj['{name_b64}'] = '{json_data_b64}'")
+
+def load(name):
+    name_b64 = _wrap_base64.b64encode(name.encode('utf-8')).decode('utf-8')
+    pkl_data_b64 = _run_js(f"self.__falekit.save_obj['{name_b64}'] || 'omg__nope'")
+    if pkl_data_b64 == 'omg__nope':
+        return None
+    pkl_data = _wrap_base64.b64decode(pkl_data_b64)
+    return _wrap_pickle.loads(pkl_data)
+
 try:
 `;
 
@@ -77,6 +91,7 @@ from io import StringIO
 import json as _wrap_json
 import base64 as _wrap_base64
 import builtins
+import pickle as _wrap_pickle
 
 _capture_out = StringIO()
 
@@ -125,6 +140,19 @@ def act_buzzer(name, onoff, freq=-1):
     freq_float = min(1000.0, freq_float)
     name_b64 = _wrap_base64.b64encode(name.encode('utf-8')).decode('utf-8')
     _run_js(f"self.__falekit.act_list.push(['buzzer', '{name_b64}', {onoff_int}, {freq_float}])")
+
+def save(name, data):
+    pkl_data = _wrap_pickle.dumps(data)
+    pkl_data_b64 = _wrap_base64.b64encode(pkl_data).decode('utf-8')
+    _run_js(f"self.__falekit.save_obj['{name_b64}'] = '{json_data_b64}'")
+
+def load(name):
+    name_b64 = _wrap_base64.b64encode(name.encode('utf-8')).decode('utf-8')
+    pkl_data_b64 = _run_js(f"self.__falekit.save_obj['{name_b64}'] || 'omg__nope'")
+    if pkl_data_b64 == 'omg__nope':
+        return None
+    pkl_data = _wrap_base64.b64decode(pkl_data_b64)
+    return _wrap_pickle.loads(pkl_data)
 
 try:
 `;

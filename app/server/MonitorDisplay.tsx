@@ -340,7 +340,7 @@ function MonitorActuatorServo(props: {
               style={{
                 margin: "auto",
                 transform: `rotate(${props.data.angle}deg)`,
-                transition: "transform 0.3s linear",
+                transition: "transform 0.2s linear",
                 filter: "grayscale(100%)",
               }}
               width={100}

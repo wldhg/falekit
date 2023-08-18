@@ -27,6 +27,7 @@ self.__falekit = {
   data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   exit_code: null,
   send_list: [],
+  save_obj: {},
 };
 
 (async () => {

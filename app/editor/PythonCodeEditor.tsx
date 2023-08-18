@@ -7,6 +7,8 @@ import {
 } from "@/_proto";
 import {
   RecoilState,
+  _editorHeight,
+  _isLeftSiderCollapsed,
   _isOnRendering,
   _isPyodideAvailable,
   _messageApi,
@@ -16,7 +18,11 @@ import {
   useRecoilState,
   useRecoilValue,
 } from "@/_recoil/editor";
-import { CheckOutlined } from "@ant-design/icons";
+import {
+  CaretLeftOutlined,
+  CaretRightOutlined,
+  CheckOutlined,
+} from "@ant-design/icons";
 import Editor, { Monaco } from "@monaco-editor/react";
 import {
   Alert,
@@ -30,15 +36,17 @@ import {
 } from "antd";
 import hotkeys from "hotkeys-js";
 import { KeyCode, KeyMod, languages, editor as nsed } from "monaco-editor";
-import { CSSProperties, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import * as styles from "./PythonCodeEditor.module.css";
+
+const docsPanelSize = 480;
 
 export default function ServerCodeEditor(props: {
   defaultValue?: string;
   onChange?: (value: string | undefined) => void;
   valueRecoil: RecoilState<string>;
-  style?: CSSProperties;
+  children?: React.ReactNode;
   saveTarget?: string;
   saveType?: "client" | "server";
   completionProvider?: languages.CompletionItemProvider;
@@ -50,6 +58,7 @@ export default function ServerCodeEditor(props: {
   const isOnRendering = useRecoilValue(_isOnRendering);
   const renderTargetPath = useRecoilValue(_renderTargetPath);
   const messageApi = useRecoilValue(_messageApi);
+  const isLeftSiderCollapsed = useRecoilValue(_isLeftSiderCollapsed);
   const [isPythonCodeValid, setIsPythonCodeValid] = useState(true);
   const [pythonCodeError, setPythonCodeError] = useState<string | undefined>();
   const [pythonLocalCode, setPythonLocalCode] = useState<string>(
@@ -59,13 +68,60 @@ export default function ServerCodeEditor(props: {
     useState(false);
   const [savedTextOpacity, setSavedTextOpacity] = useState(0);
   const [isMonacoMounted, setIsMonacoMounted] = useState(false);
+  const [isPanelOpen, setIsPanelOpen] = useState(true);
+  const [monacoWidth, setMonacoWidth] = useState(0);
+  const [monacoHeight, setMonacoHeight] = useRecoilState(_editorHeight);
   const editorRef = useRef<nsed.IStandaloneCodeEditor>();
   const pythonLocalCodeRef = useRef<string>(
     codeValue || props.defaultValue || ""
   );
+  const containerRef = useRef<HTMLDivElement>(null);
   const savedTextOpacityTimeoutRef = useRef<NodeJS.Timeout>();
   const waitForNoInputToSaveRequestTimeoutRef = useRef<NodeJS.Timeout>();
   const waitForNoInputToValidateTimeoutRef = useRef<NodeJS.Timeout>();
+  const leftSiderPrevStateRef = useRef<boolean>(isLeftSiderCollapsed);
+  const monacoDispose1Ref = useRef<() => void>();
+
+  useEffect(() => {
+    const setMonacoSize = (addi: number = 0) => {
+      if (containerRef.current) {
+        setMonacoWidth(
+          containerRef.current.clientWidth -
+            (isPanelOpen ? docsPanelSize + 64 : 64) +
+            addi
+        );
+      }
+      if (containerRef.current) {
+        setMonacoHeight(containerRef.current.clientHeight - 60);
+      }
+      if (editorRef.current) {
+        editorRef.current.layout();
+      }
+    };
+
+    if (leftSiderPrevStateRef.current !== isLeftSiderCollapsed) {
+      if (isLeftSiderCollapsed) {
+        setTimeout(() => {
+          setMonacoSize(0);
+        }, 300);
+      } else {
+        setMonacoSize(-120);
+      }
+      leftSiderPrevStateRef.current = isLeftSiderCollapsed;
+    } else {
+      setMonacoSize();
+    }
+
+    window.addEventListener("resize", () => {
+      setMonacoSize();
+    });
+
+    return () => {
+      window.removeEventListener("resize", () => {
+        setMonacoSize();
+      });
+    };
+  }, [isPanelOpen, isLeftSiderCollapsed, isMonacoMounted, setMonacoHeight]);
 
   const requestToRemoteSave = useCallback(
     (displaySuccessMessage: boolean = false) => {
@@ -234,6 +290,9 @@ validate("""\n${value.replace(/"""/g, "'''").replace(/\\/g, "\\\\")}\n""")
           renderTargetPath !== `/editor/node-${props.saveType}`
         ) {
           requestToRemoteSave(true);
+          if (monacoDispose1Ref.current) {
+            monacoDispose1Ref.current();
+          }
         }
       };
     }
@@ -255,10 +314,11 @@ validate("""\n${value.replace(/"""/g, "'''").replace(/\\/g, "\\\\")}\n""")
       ctrlSAction();
     });
     if (props.completionProvider) {
-      monaco.languages.registerCompletionItemProvider(
+      const { dispose } = monaco.languages.registerCompletionItemProvider(
         "python",
         props.completionProvider
       );
+      monacoDispose1Ref.current = dispose;
     }
     setIsMonacoMounted(true);
   };
@@ -321,84 +381,130 @@ validate("""\n${value.replace(/"""/g, "'''").replace(/\\/g, "\\\\")}\n""")
   };
 
   return (
-    <div
+    <Space
+      ref={containerRef}
       style={{
-        display: "flex",
-        flexDirection: "column",
-        ...props.style,
+        width: "100%",
+        height: "100%",
+        alignItems: "start",
+        gap: "16px",
       }}
+      // @ts-ignore-next-line
+      className={styles.spaceWrapper}
     >
-      <Row>
-        <Col flex="auto">
-          <Space>
-            <Button
-              disabled={!isMonacoMounted}
-              type="primary"
-              onClick={handleDownload}
-            >
-              다운로드
-            </Button>
-            <Button disabled={!isMonacoMounted} onClick={handleFileOpen}>
-              열기
-            </Button>
-            <Button
-              disabled={!isMonacoMounted}
-              onClick={initValue}
-              danger
-              type={isInitializationRequested ? "primary" : "default"}
-            >
-              코드 초기화
-            </Button>
-          </Space>
-          <Divider
-            type="vertical"
-            style={{
-              margin: "0px 16px",
-            }}
-          />
-          <Space>
-            <Typography.Text strong>구문 검사</Typography.Text>
-            <Alert
-              type={validityType}
-              message={validityMessage}
-              style={{
-                border: "none",
-                backgroundColor: "transparent",
-              }}
-              showIcon
-            />
-          </Space>
-        </Col>
-        <Col
-          style={{
-            display: "flex",
-            alignItems: "center",
-            opacity: savedTextOpacity,
-            transition: savedTextOpacity > 0 ? "" : "opacity 0.5s",
-          }}
-        >
-          <Space>
-            <CheckOutlined />
-            <Typography.Text type="secondary">저장됨</Typography.Text>
-          </Space>
-        </Col>
-      </Row>
-      <div style={{ height: "16px", width: "100%" }}></div>
-      <Spin
-        spinning={!isMonacoMounted}
-        // @ts-ignore-next-line
-        wrapperClassName={styles.spinWrapper}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          width: "100%",
+          height: "100%",
+        }}
       >
-        <Editor
-          defaultLanguage="python"
-          language="python"
-          defaultValue={props.defaultValue}
-          value={pythonLocalCode}
-          theme={themeName === "dark" ? "vs-dark" : "light"}
-          onChange={handleEditorChange}
-          onMount={handleEditorDidMount}
-        />
-      </Spin>
-    </div>
+        <Row>
+          <Col flex="auto">
+            <Space>
+              <Button
+                disabled={!isMonacoMounted}
+                type="primary"
+                onClick={handleDownload}
+              >
+                다운로드
+              </Button>
+              <Button disabled={!isMonacoMounted} onClick={handleFileOpen}>
+                열기
+              </Button>
+              <Button
+                disabled={!isMonacoMounted}
+                onClick={initValue}
+                danger
+                type={isInitializationRequested ? "primary" : "default"}
+              >
+                코드 초기화
+              </Button>
+            </Space>
+            <Divider
+              type="vertical"
+              style={{
+                margin: "0px 16px",
+              }}
+            />
+            <Space>
+              <Typography.Text strong>구문 검사</Typography.Text>
+              <Alert
+                type={validityType}
+                message={validityMessage}
+                style={{
+                  border: "none",
+                  backgroundColor: "transparent",
+                }}
+                showIcon
+              />
+            </Space>
+          </Col>
+          <Col
+            style={{
+              display: "flex",
+              alignItems: "center",
+              opacity: savedTextOpacity,
+              transition: savedTextOpacity > 0 ? "" : "opacity 0.5s",
+            }}
+          >
+            <Space>
+              <CheckOutlined />
+              <Typography.Text type="secondary">저장됨</Typography.Text>
+            </Space>
+          </Col>
+        </Row>
+        <div style={{ height: "16px", width: "100%" }}></div>
+        <Spin
+          spinning={!isMonacoMounted}
+          // @ts-ignore-next-line
+          wrapperClassName={styles.spinWrapper}
+        >
+          <Editor
+            defaultLanguage="python"
+            language="python"
+            defaultValue={props.defaultValue}
+            value={pythonLocalCode}
+            theme={themeName === "dark" ? "vs-dark" : "light"}
+            onChange={handleEditorChange}
+            onMount={handleEditorDidMount}
+            options={{
+              renderWhitespace: "boundary",
+              minimap: {
+                size: "fill",
+              },
+              "semanticHighlighting.enabled": true,
+            }}
+            width={monacoWidth}
+            height={monacoHeight}
+          />
+        </Spin>
+      </div>
+      {props.children && (
+        <>
+          <Button
+            onClick={() => {
+              setIsPanelOpen(!isPanelOpen);
+            }}
+            type="text"
+            icon={isPanelOpen ? <CaretRightOutlined /> : <CaretLeftOutlined />}
+          />
+          <div
+            style={{
+              width: isPanelOpen ? docsPanelSize : "0px",
+              opacity: isPanelOpen ? 1 : 0,
+              transition: isPanelOpen
+                ? "width ease 0.2s, opacity linear 0.2s"
+                : "",
+              transform: isPanelOpen ? "" : "scale(0)",
+              height: "100%",
+            }}
+          >
+            {props.children}
+          </div>
+        </>
+      )}
+    </Space>
   );
 }

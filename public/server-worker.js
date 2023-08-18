@@ -42,6 +42,7 @@ self.__falekit = {
   exit_code: null,
   disp_list: [],
   act_list: [],
+  save_obj: {},
 };
 
 (async () => {

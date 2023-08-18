@@ -6,6 +6,11 @@ import {
   type Position,
 } from "monaco-editor";
 
+const commonCompletionRawList: string[][] = [
+  ["load", 'load("식별자")', "저장한 로컬 데이터를 불러옵니다."],
+  ["save", 'save("식별자", 값)', "로컬에 데이터를 저장합니다."],
+];
+
 const clientCodeCompletionRawList: string[][] = [
   [
     "get_accel",
@@ -60,7 +65,10 @@ export const clientCodeCompletionProvider: languages.CompletionItemProvider = {
       position.lineNumber,
       word.endColumn
     );
-    const list = clientCodeCompletionRawList.map((item) => {
+    const list = [
+      ...commonCompletionRawList,
+      ...clientCodeCompletionRawList,
+    ].map((item) => {
       return {
         label: item[0],
         kind: languages.CompletionItemKind.Function,
@@ -90,11 +98,7 @@ const serverCodeCompletionRawList: string[][] = [
     'act_led("이름", "색상값")',
     "LED를 제어합니다. #000이면 검은색, #fff면 흰색입니다.",
   ],
-  [
-    "act_buzzer",
-    'act_buzzer("이름", 헤르츠주파수, 밀리초길이)',
-    "부저를 울립니다.",
-  ],
+  ["act_buzzer", 'act_buzzer("이름", 동작여부, 주파수)', "부저를 울립니다."],
   ["act_motor", 'act_motor("이름", RPM값)', "모터를 제어합니다."],
   [
     "act_servo",
@@ -117,7 +121,10 @@ export const serverCodeCompletionProvider: languages.CompletionItemProvider = {
       position.lineNumber,
       word.endColumn
     );
-    const list = serverCodeCompletionRawList.map((item) => {
+    const list = [
+      ...commonCompletionRawList,
+      ...serverCodeCompletionRawList,
+    ].map((item) => {
       return {
         label: item[0],
         kind: languages.CompletionItemKind.Function,

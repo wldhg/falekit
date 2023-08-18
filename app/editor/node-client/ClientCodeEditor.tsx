@@ -1,8 +1,14 @@
 "use client";
 
-import { clientCodeCompletionProvider, clientDefaultCode } from "@/_misc";
+import {
+  clientCodeCompletionProvider,
+  clientDefaultCode,
+  clientFunctionDocs,
+  commonFunctionDocs,
+} from "@/_misc";
 import { _clientCode } from "@/_recoil/editor";
 import { Typography } from "antd";
+import DocsPanel from "../DocsPanel";
 import PythonCodeEditor from "../PythonCodeEditor";
 
 export default function ClientCodeEditor() {
@@ -20,7 +26,11 @@ export default function ClientCodeEditor() {
         <Typography.Text>
           센서가 반복해서 수행할 로직을 구성하세요. 아래 코드는 센서가 멈출
           때까지 끊임없이 반복되며, 센서 값은 아래 코드가 한 번 실행될 때마다
-          업데이트됩니다.
+          업데이트됩니다. 실행 간격을{" "}
+          <Typography.Text code>time.sleep()</Typography.Text>으로 조절할 수
+          있습니다. 반복 실행 간 데이터를 유지하려면{" "}
+          <Typography.Text code>save()</Typography.Text> 및{" "}
+          <Typography.Text code>load()</Typography.Text>를 사용할 수 있습니다.
         </Typography.Text>
       </div>
       <PythonCodeEditor
@@ -29,10 +39,9 @@ export default function ClientCodeEditor() {
         completionProvider={clientCodeCompletionProvider}
         saveTarget="/backend/save-code"
         saveType="client"
-        style={{
-          height: "100%",
-        }}
-      />
+      >
+        <DocsPanel docs={[...clientFunctionDocs, ...commonFunctionDocs]} />
+      </PythonCodeEditor>
     </div>
   );
 }

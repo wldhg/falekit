@@ -14,6 +14,16 @@ export const _renderCurrentPath = atom<string>({
   default: "",
 });
 
+export const _isLeftSiderCollapsed = atom<boolean>({
+  key: "isLeftSiderCollapsed",
+  default: false,
+});
+
+export const _editorHeight = atom<number>({
+  key: "editorHeight",
+  default: 0,
+});
+
 export const _serverCode = atom<string>({
   key: "serverCode",
   default: "",

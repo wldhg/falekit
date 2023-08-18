@@ -6,3 +6,13 @@
 .spinWrapper > div:last-child {
   height: 100%;
 }
+
+.spaceWrapper > *:first-child {
+  flex-grow: 1;
+}
+
+.spaceWrapper > div {
+  height: 100%;
+  align-items: center;
+  display: flex;
+}

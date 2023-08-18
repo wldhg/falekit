@@ -1,10 +1,14 @@
 "use client";
 
 import ThemedLogo from "@/_components/ThemedLogo";
-import { _isOnRendering, useRecoilValue } from "@/_recoil/editor";
+import {
+  _isLeftSiderCollapsed,
+  _isOnRendering,
+  useRecoilState,
+  useRecoilValue,
+} from "@/_recoil/editor";
 import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
 import { Button, Layout, Spin, Typography, theme } from "antd";
-import { useState } from "react";
 import ServerNavigation from "./EditorNavigation";
 import PyodideLoader from "./PyodideLoader";
 
@@ -16,7 +20,7 @@ export default function ServerFrame({
   children: React.ReactNode;
 }) {
   const isOnRendering = useRecoilValue(_isOnRendering);
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useRecoilState(_isLeftSiderCollapsed);
   const {
     token: { colorBgLayout, colorBgMask },
   } = theme.useToken();
@@ -42,7 +46,7 @@ export default function ServerFrame({
               fixedTo="light"
               style={{
                 padding: collapsed ? "0 22%" : "0 30%",
-                transition: "padding 0.3s",
+                transition: "padding 0.2s",
                 marginTop: "-10px",
               }}
             />
@@ -52,7 +56,7 @@ export default function ServerFrame({
                 bottom: "20px",
                 textAlign: "center",
                 width: "100%",
-                transition: "opacity 0.3s",
+                transition: "opacity 0.2s",
                 opacity: collapsed ? 0 : 1,
                 color: "whitesmoke",
               }}
