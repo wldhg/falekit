@@ -293,7 +293,7 @@ export const serverFunctionDocs: FunctionDoc[] = [
             type: "str",
           },
           {
-            name: "x축 값, y축 값의 튜플",
+            name: "x축 및 y축 값 튜플",
             type: "tuple[list[str | int | float], list[int | float]]",
           },
         ],
@@ -319,7 +319,7 @@ export const serverFunctionDocs: FunctionDoc[] = [
             type: "str",
           },
           {
-            name: "선 이름, 데이터 배열의 딕셔너리",
+            name: "선 이름과 데이터 딕셔너리",
             type: "dict[str, ...]",
           },
         ],
