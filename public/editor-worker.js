@@ -1,6 +1,6 @@
 (async () => {
   self.postMessage({ type: "isLoaded", payload: false });
-  importScripts("https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js");
+  importScripts("/pyodide/pyodide.js");
 
   self.pyodide = await loadPyodide();
 

@@ -128,7 +128,7 @@ export const clientFunctionDocs: FunctionDoc[] = [
   {
     name: "get_gyro",
     description:
-      "자이로 센서의 x, y, z 성분을 튜플로 리턴합니다. 단위는 초당 회전 각도입니다.",
+      "자이로(각속도) 센서의 x, y, z 성분을 튜플로 리턴합니다. 단위는 초당 회전 각도입니다.",
     overridings: [
       {
         args: [],
@@ -164,7 +164,7 @@ export const clientFunctionDocs: FunctionDoc[] = [
   {
     name: "get_sensor_time",
     description:
-      "센서에서 데이터를 수집한 (센서 기준) 타임스탬프를 리턴합니다. 센서가 동작하기 시작한 뒤 몇 초가 지났는지가 반환됩니다.",
+      "센서에서 데이터를 수집한 (센서 기준) 타임스탬프를 리턴합니다. 센서가 동작하기 시작한 뒤 몇 초가 지났는지가 반환됩니다. 센서가 시작되는 시간을 명확하게 알 수 없으므로, 이 값은 단일 값 자체로보다는 다른 값과 상대적으로 비교했을 때 의미가 있습니다.",
     overridings: [
       {
         args: [],
@@ -268,16 +268,13 @@ export const serverFunctionDocs: FunctionDoc[] = [
             type: "str",
           },
           {
-            name: "데이터 배열",
-            type: "Plottable | dict[str, Plottable]",
+            name: "y축 값 리스트",
+            type: "list[int | float]",
           },
         ],
         description:
-          "데이터 배열을 그래프로 표시합니다. 1차원 배열이 하나를 주면 그것을 y축 값으로 하는 그래프가, 1차원 배열 두 개를 튜플로 주면 각각을 x축과 y축 값으로 하는 그래프가 그려집니다. 여러 그래프를 한 그림에 나타내려면 각 선의 이름을 키로, 데이터 배열을 값으로 하는 딕셔너리를 주면 됩니다.",
-        aliases: {
-          Plottable: "Data1d | tuple[Data1d, Data1d]",
-          Data1d: "list[str | int | float | bool]",
-        },
+          "데이터 배열을 2차원 좌표에 선으로 나타냅니다. x축 값은 자동으로 결정됩니다.",
+        aliases: {},
         returns: {
           description: "",
           type: "None",
@@ -285,14 +282,55 @@ export const serverFunctionDocs: FunctionDoc[] = [
         examples: [
           {
             code: 'display("my graph", [13, 15, 17, 19, 21])',
-            description:
-              "x축 값이 0 ~ 4이고, y축 값이 주어진 데이터와 같은 1차원 선",
+            description: "x축 값이 0 ~ 4이고, y축 값이 주어진 데이터와 같은 선",
           },
+        ],
+      },
+      {
+        args: [
+          {
+            name: "제목",
+            type: "str",
+          },
+          {
+            name: "x축 값, y축 값의 튜플",
+            type: "tuple[list[str | int | float], list[int | float]]",
+          },
+        ],
+        description:
+          "데이터 배열을 2차원 좌표에 나타냅니다. 주어진 배열 두 개 각각을 x축과 y축 값으로 하는 그래프가 그려집니다.",
+        aliases: {},
+        returns: {
+          description: "",
+          type: "None",
+        },
+        examples: [
           {
             code: 'display("my graph", ([1, 2, 3, 4, 5], [13, 15, 17, 19, 21]))',
             description:
               "x축 값이 주어진 첫 번째 데이터와 같고, y축 값이 주어진 두 번째 데이터와 같은 1차원 선",
           },
+        ],
+      },
+      {
+        args: [
+          {
+            name: "제목",
+            type: "str",
+          },
+          {
+            name: "선 이름, 데이터 배열의 딕셔너리",
+            type: "dict[str, ...]",
+          },
+        ],
+        description:
+          "딕셔너리를 활용하면 그래프에 여러 선을 그릴 수 있습니다. 딕셔너리 키는 선의 이름, 딕셔너리 값은 선의 데이터입니다. 선의 데이터는 위 두 가지 방법(y축 값 리스트, x축 값과 y축 값 리스트의 배열) 모두 사용 가능합니다.",
+        aliases: {},
+        returns: {
+          description: "",
+          type: "None",
+        },
+        examples: [
           {
             code: 'display("my graph", {"first": [13, 15, 17, 19, 21], "second": [1, 2, 3, 4, 5]})',
             description:

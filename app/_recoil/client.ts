@@ -7,6 +7,11 @@ export const _currentMotionData = atom<number[]>({
   default: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 });
 
+export const _currentMotionDataNRT = atom<number[]>({
+  key: "currentMotionDataNRT",
+  default: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+});
+
 export const _currentOrientationData = atom<number[]>({
   key: "currentOrientationData",
   default: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],

@@ -33,7 +33,7 @@ self.__falekit = {
 
 (async () => {
   self.getValueFromMain("reset", []);
-  importScripts("https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js");
+  importScripts("/pyodide/pyodide.js");
   const script = await self.getValueFromMain("get_script", []);
 
   self.getValueFromMain("status", ["Python 바이너리 로드 중"]);

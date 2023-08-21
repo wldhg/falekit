@@ -2,27 +2,23 @@
 
 import { type FunctionDoc } from "@/_misc";
 import { _editorHeight, useRecoilValue } from "@/_recoil/editor";
-import { List, Space, Typography, theme } from "antd";
+import { Collapse, Space, Typography } from "antd";
 
 export default function DocsPanel(props: { docs: FunctionDoc[] }) {
   const editorHeight = useRecoilValue(_editorHeight);
-  const {
-    token: { colorBgBase },
-  } = theme.useToken();
   return (
     <Space direction="vertical" style={{ width: "100%" }}>
       <Typography.Title level={4}>레퍼런스</Typography.Title>
-      <List
-        dataSource={props.docs}
+      <Collapse
         bordered
         style={{
-          backgroundColor: colorBgBase,
           maxHeight: editorHeight + 8,
           overflow: "auto",
         }}
-        renderItem={(item) => (
-          <List.Item>
-            <Space direction="vertical" size={0}>
+        items={props.docs.map((item) => ({
+          key: item.name,
+          label: (
+            <>
               <Typography.Text
                 style={{
                   fontFamily: "'Fira Mono', monospace",
@@ -31,9 +27,19 @@ export default function DocsPanel(props: { docs: FunctionDoc[] }) {
               >
                 {item.name}
               </Typography.Text>
+              <br />
               <Typography.Text type="secondary">
                 {item.description}
               </Typography.Text>
+            </>
+          ),
+          children: (
+            <ul
+              style={{
+                paddingLeft: 16,
+                paddingRight: 16,
+              }}
+            >
               <ul
                 style={{
                   paddingLeft: 16,
@@ -167,9 +173,9 @@ export default function DocsPanel(props: { docs: FunctionDoc[] }) {
                   </li>
                 ))}
               </ul>
-            </Space>
-          </List.Item>
-        )}
+            </ul>
+          ),
+        }))}
       />
     </Space>
   );

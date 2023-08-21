@@ -23,7 +23,7 @@ self.getValueFromMain = async (key, payload) => {
 self.queryData = (key, amount) => {
   // NOTE : using XHR instead of fetch because fetch doesn't support synchronous requests
   const xhr = new XMLHttpRequest();
-  xhr.open("GET", `/backend/load-data?id=${key}&cnt=${amount}`, false);
+  xhr.open("GET", `/backend/store-data?id=${key}&cnt=${amount}`, false);
   xhr.send();
   const response = JSON.parse(xhr.responseText);
   if (response.code === "green") {
@@ -48,7 +48,7 @@ self.__falekit = {
 
 (async () => {
   self.getValueFromMain("reset", []);
-  importScripts("https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js");
+  importScripts("/pyodide/pyodide.js");
   const script = await self.getValueFromMain("get_script", []);
 
   self.getValueFromMain("status", ["Python 바이너리 로드 중"]);

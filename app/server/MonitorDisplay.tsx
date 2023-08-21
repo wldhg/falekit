@@ -4,6 +4,7 @@ import {
   _messageApi,
   _serverActuatorData,
   _serverMonitorData,
+  _themeName,
   useRecoilState,
   useRecoilValue,
 } from "@/_recoil/server";
@@ -192,18 +193,28 @@ function MonitorActuatorBuzzer(props: {
     frequency: number;
   };
 }) {
-  const [oscillator, _] = useState<Oscillator>(
-    new Oscillator(props.data.frequency, "sine").toDestination()
-  );
+  const [oscillator, setOscillator] = useState<Oscillator | null>(null);
   const isCodeRunning = useRecoilValue(_isCodeRunning);
 
   useEffect(() => {
-    oscillator.volume.value = -10;
-    oscillator.frequency.value = props.data.frequency;
-    if (props.data.status === "on" && isCodeRunning) {
-      oscillator.start();
-    } else {
-      oscillator.stop();
+    const osc = new Oscillator(100, "sine").toDestination();
+    setOscillator(osc);
+
+    return () => {
+      osc.stop();
+      osc.dispose();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (oscillator) {
+      oscillator.volume.value = -10;
+      oscillator.frequency.value = props.data.frequency;
+      if (props.data.status === "on" && isCodeRunning) {
+        oscillator.start();
+      } else {
+        oscillator.stop();
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.data.frequency, props.data.status, isCodeRunning]);
@@ -314,6 +325,8 @@ function MonitorActuatorServo(props: {
     angle: number;
   };
 }) {
+  const themeName = useRecoilValue(_themeName);
+
   return (
     <MonitorBlockBase
       title={
@@ -331,7 +344,10 @@ function MonitorActuatorServo(props: {
             style={{
               width: "100%",
               textAlign: "center",
-              background: "rgba(200, 200, 200, 0.6)",
+              background: themeName === "dark" ? "#292c33" : "#fafafa",
+              border: `1px solid ${
+                themeName === "dark" ? "#202225" : "#d9d9d9"
+              }`,
               borderRadius: "6px",
             }}
           >
@@ -341,7 +357,9 @@ function MonitorActuatorServo(props: {
                 margin: "auto",
                 transform: `rotate(${props.data.angle}deg)`,
                 transition: "transform 0.2s linear",
-                filter: "grayscale(100%)",
+                filter: `grayscale(100%)${
+                  themeName === "dark" ? " invert(1)" : ""
+                }`,
               }}
               width={100}
               height={100}
@@ -543,8 +561,8 @@ export default function MonitorDisplay() {
           })
         ) : (
           <Typography.Text>
-            이곳에 곧 가상 액츄에이터가 표시됩니다. 아직은 사용된 액츄에이터가
-            없습니다. 한 번도 서버 코드를 실행하지 않았거나 서버 코드 안의{" "}
+            이곳에 곧 가상 액츄에이터가 표시됩니다. 지금은 사용된 액츄에이터가
+            없습니다. 아직 서버 코드 안의{" "}
             <Typography.Text code>act_*</Typography.Text> 함수가 실행된 적이
             없습니다.
           </Typography.Text>
@@ -588,9 +606,9 @@ export default function MonitorDisplay() {
           })
         ) : (
           <Typography.Text>
-            표시할 데이터가 아직 없습니다. 한 번도 서버 코드를 실행하지 않았거나
-            서버 코드 안의 <Typography.Text code>display</Typography.Text>{" "}
-            함수가 실행된 적이 없습니다.
+            이곳에 곧 데이터가 표시됩니다. 아직 서버 코드 안의{" "}
+            <Typography.Text code>display</Typography.Text> 함수가 실행된 적이
+            없습니다.
           </Typography.Text>
         )}
       </div>

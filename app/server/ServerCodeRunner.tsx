@@ -50,6 +50,7 @@ export default function ServerCodeRunner() {
   useEffect(() => {
     if (isCodeRunning) {
       setServerMonitorData({});
+      setServerActuatorData({});
 
       const indentedServerCode = "    " + serverCode.split("\n").join("\n    ");
       const finalServerCode =
@@ -225,7 +226,9 @@ export default function ServerCodeRunner() {
 
   return (
     <>
-      <Typography.Text strong>실행 로그</Typography.Text>
+      <Typography.Text strong>
+        실행 로그 <Typography.Text code>print()</Typography.Text>
+      </Typography.Text>
       <div
         ref={logRef}
         style={{
