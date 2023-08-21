@@ -10,9 +10,7 @@ import {
   _editorHeight,
   _isLeftSiderCollapsed,
   _isOnRendering,
-  _isPyodideAvailable,
   _messageApi,
-  _pyodide,
   _renderTargetPath,
   _themeName,
   useRecoilState,
@@ -41,6 +39,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import * as styles from "./PythonCodeEditor.module.css";
 
 const docsPanelSize = 480;
+const workerURL = "/editor-worker.js";
 
 export default function ServerCodeEditor(props: {
   defaultValue?: string;
@@ -53,8 +52,6 @@ export default function ServerCodeEditor(props: {
 }) {
   const themeName = useRecoilValue(_themeName);
   const [codeValue, setCodeValue] = useRecoilState(props.valueRecoil);
-  const pyodide = useRecoilValue(_pyodide);
-  const isPyodideAvailable = useRecoilValue(_isPyodideAvailable);
   const isOnRendering = useRecoilValue(_isOnRendering);
   const renderTargetPath = useRecoilValue(_renderTargetPath);
   const messageApi = useRecoilValue(_messageApi);
@@ -70,6 +67,7 @@ export default function ServerCodeEditor(props: {
   const [isMonacoMounted, setIsMonacoMounted] = useState(false);
   const [isPanelOpen, setIsPanelOpen] = useState(true);
   const [monacoWidth, setMonacoWidth] = useState(0);
+  const [isPyodideAvailable, setIsPyodideAvailable] = useState(false);
   const [monacoHeight, setMonacoHeight] = useRecoilState(_editorHeight);
   const editorRef = useRef<nsed.IStandaloneCodeEditor>();
   const pythonLocalCodeRef = useRef<string>(
@@ -82,6 +80,46 @@ export default function ServerCodeEditor(props: {
   const leftSiderPrevStateRef = useRef<boolean>(isLeftSiderCollapsed);
   const monacoDispose1Ref = useRef<() => void>();
   const ctrlSActionRef = useRef<() => void>();
+  const runPyodideCodeRef = useRef<(code: string) => Promise<boolean>>();
+  const runPyodidePromiseObjRef = useRef<{
+    resolve: (value: boolean) => void;
+    reject: (reason?: any) => void;
+  }>();
+
+  useEffect(() => {
+    const worker = new Worker(workerURL);
+    worker.addEventListener("message", (e) => {
+      const {
+        type,
+        payload,
+      }: {
+        type: string;
+        payload: Error | boolean;
+      } = e.data;
+      if (type === "isLoaded") {
+        setIsPyodideAvailable(payload as boolean);
+      } else if (type === "result") {
+        if (runPyodidePromiseObjRef.current) {
+          if (payload instanceof Error) {
+            runPyodidePromiseObjRef.current.reject(payload);
+          } else {
+            runPyodidePromiseObjRef.current.resolve(payload);
+          }
+        }
+      }
+    });
+
+    runPyodideCodeRef.current = (code: string) => {
+      return new Promise<boolean>((resolve, reject) => {
+        runPyodidePromiseObjRef.current = { resolve, reject };
+        worker.postMessage(code);
+      });
+    };
+
+    return () => {
+      worker.terminate();
+    };
+  }, []);
 
   useEffect(() => {
     const setMonacoSize = (addi: number = 0) => {
@@ -182,11 +220,11 @@ export default function ServerCodeEditor(props: {
   }, [ctrlSAction]);
 
   useEffect(() => {
-    if (pyodide && isPyodideAvailable) {
+    if (isPyodideAvailable) {
       handleEditorChange(pythonLocalCode);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pyodide, isPyodideAvailable]);
+  }, [isPyodideAvailable]);
 
   const initValue = () => {
     if (!isInitializationRequested) {
@@ -215,9 +253,11 @@ export default function ServerCodeEditor(props: {
 
   const validatePythonCode = useCallback(
     (value: string) => {
-      if (value && pyodide && isPyodideAvailable) {
+      if (isPyodideAvailable && runPyodideCodeRef.current) {
         try {
-          let syntaxError = pyodide.runPython(`
+          runPyodideCodeRef
+            .current(
+              `
 import ast
 
 def validate(code):
@@ -228,13 +268,21 @@ def validate(code):
     return None
 
 validate("""\n${value.replace(/"""/g, "'''").replace(/\\/g, "\\\\")}\n""")
-          `);
-          if (syntaxError) {
-            throw new Error(String(syntaxError));
-          } else {
-            setIsPythonCodeValid(true);
-            setPythonCodeError(undefined);
-          }
+          `
+            )
+            .then((syntaxError) => {
+              if (syntaxError) {
+                throw new Error(String(syntaxError));
+              } else {
+                setIsPythonCodeValid(true);
+                setPythonCodeError(undefined);
+              }
+            })
+            .catch((e) => {
+              console.log(e);
+              setIsPythonCodeValid(false);
+              setPythonCodeError(e?.message);
+            });
         } catch (e: any) {
           console.log(e);
           setIsPythonCodeValid(false);
@@ -242,7 +290,7 @@ validate("""\n${value.replace(/"""/g, "'''").replace(/\\/g, "\\\\")}\n""")
         }
       }
     },
-    [pyodide, isPyodideAvailable]
+    [isPyodideAvailable]
   );
 
   useEffect(() => {
